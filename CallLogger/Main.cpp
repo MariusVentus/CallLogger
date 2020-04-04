@@ -11,6 +11,7 @@ StringParser g_crafter;
 #define ID_HELP 9002
 #define ID_TRAIN_AI 9003
 #define ID_PARSE 9004
+#define ID_OPENCSV 9005
 #define IDC_MAIN_EDIT 101
 
 HWND hID, hNote;
@@ -47,6 +48,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 		CreateWindowEx(WS_EX_CLIENTEDGE, "Button", "Parse n Add", WS_CHILD | WS_VISIBLE,
 			15, 350, 200, 50, hwnd, (HMENU)ID_PARSE, GetModuleHandle(NULL), NULL);
+		CreateWindowEx(WS_EX_CLIENTEDGE, "Button", "Open CSV", WS_CHILD | WS_VISIBLE,
+			215, 350, 200, 50, hwnd, (HMENU)ID_OPENCSV, GetModuleHandle(NULL), NULL);
 
 	case WM_LBUTTONDOWN:
 	{
@@ -69,6 +72,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			break;
 		case ID_HELP:
 			MessageBox(hwnd, "I made this in an hour while eating breakfast. There is no help, only Zuul. Or ping me on Teams.", "Halp", MB_OK | MB_ICONINFORMATION);
+			break;
+		case ID_OPENCSV:
+			system("notepad.exe CallLog.csv");
 			break;
 		case ID_PARSE:
 			char srNum[100];

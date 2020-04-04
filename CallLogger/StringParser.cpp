@@ -1,4 +1,19 @@
 #include "StringParser.h"
+#include <fstream>
+
+void StringParser::OutputToCSV(std::string inSR, std::string inNotes)
+{
+	std::string csvName = "CallLog.csv";
+	{
+		std::ifstream in(csvName);
+		if (!in) {
+			std::ofstream tempOut(csvName, std::ofstream::app);
+			tempOut << "  Date  ,  SR#  ,  Time  ,  Phone#  \n";
+		}
+	}
+	std::ofstream out(csvName, std::ofstream::app);
+	out << CraftFullCSVRow(inSR, inNotes) << "\n";
+}
 
 std::string StringParser::ParseRawToCSV(std::string str)
 {
@@ -72,22 +87,24 @@ std::string StringParser::ParseRawToCSV(std::string str)
 		}
 	}
 	//Time
-	if (token.size() == 4) {
-		token.insert(2, ":");
-		if (notMilAmPm == 1) {
-			token.insert(5, " AM");
+	if (token.size() > 0) {
+		if (token.size() == 4) {
+			token.insert(2, ":");
+			if (notMilAmPm == 1) {
+				token.insert(5, " AM");
+			}
+			else if (notMilAmPm == 2) {
+				token.insert(5, " PM");
+			}
 		}
-		else if (notMilAmPm == 2) {
-			token.insert(5, " PM");
-		}
-	}
-	else {
-		token.insert(1, ":");
-		if (notMilAmPm == 1) {
-			token.insert(4, " AM");
-		}
-		else if (notMilAmPm == 2) {
-			token.insert(4, " PM");
+		else {
+			token.insert(1, ":");
+			if (notMilAmPm == 1) {
+				token.insert(4, " AM");
+			}
+			else if (notMilAmPm == 2) {
+				token.insert(4, " PM");
+			}
 		}
 	}
 	token.push_back(',');
@@ -116,22 +133,22 @@ std::string StringParser::ParseRawToCSV(std::string str)
 	if (token == "") {
 		token = str;
 	}
+	if (token.size() != 0) {
+		token.insert(token.size() - 4, "-");
+		if ((token.size() - countryCodeNum) > 8) {
+			token.insert(token.size() - 8, "-");
+		}
+		if (countryCodeNum != 0) {
+			token.insert(countryCodeNum, " ");
+		}
+		if (countryCodeNum == 3 && (token.size() - countryCodeNum) == 9) {
+			token.replace(token.size() - 9, 1, "-");
+		}
 
-	token.insert(token.size() - 4, "-");
-	if ((token.size() - countryCodeNum) > 8) {
-		token.insert(token.size() - 8, "-");
+		if (countryCodeNum != 3 || token.size() > 12) {
+			token.insert(0, "+");
+		}
 	}
-	if (countryCodeNum != 0) {
-		token.insert(countryCodeNum, " ");
-	}
-	if (countryCodeNum == 3 && (token.size() - countryCodeNum) == 9) {
-		token.replace(token.size() - 9, 1, "-");
-	}
-
-	if (countryCodeNum != 3 || token.size() > 12) {
-		token.insert(0, "+");
-	}
-
 	output.append(token);
 	return output;
 }
@@ -143,9 +160,14 @@ std::string StringParser::CraftFullCSVRow(std::string inSR, std::string inNotes)
 	row.push_back(',');
 	
 	//Erase inSR non-numbers
-	for (unsigned i = 0; i < inSR.size(); i++) {
+	for (unsigned i = 0; i < inSR.size();) {
 		if (inSR[i] < 48 || inSR[i] > 57) {
 			inSR.erase(i, 1);
+			if (i != 0) { --i; }
+			else { i = 0; }
+		}
+		else {
+			i++;
 		}
 	}
 

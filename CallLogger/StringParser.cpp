@@ -3,16 +3,46 @@
 
 void StringParser::OutputToCSV(std::string inSR, std::string inNotes)
 {
-	std::string csvName = "CallLog.csv";
-	{
-		std::ifstream in(csvName);
-		if (!in) {
-			std::ofstream tempOut(csvName, std::ofstream::app);
-			tempOut << "  Date  ,  SR#  ,  Time  ,  Phone#  \n";
-		}
+
+	std::ifstream in(csvName);
+	if (!in) {
+		std::ofstream tempOut(csvName, std::ofstream::app);
+		tempOut << "  Date  ,  SR#  ,  Time  ,  Phone#  \n";
 	}
+
 	std::ofstream out(csvName, std::ofstream::app);
 	out << CraftFullCSVRow(inSR, inNotes) << "\n";
+}
+
+void StringParser::RemoveLastLine(void)
+{
+	std::ifstream in(csvName);
+	if (in) {
+		std::ifstream count(csvName);
+		std::string temp;
+		std::string fileInfo;
+		unsigned lineCount = 0;
+		do {
+			temp.clear();
+			std::getline(count, temp);
+			if (!temp.empty()) {
+				lineCount++;
+			}
+		} while (!count.eof() && !temp.empty());
+		if (lineCount <= 2) {
+			lineCount = 2;
+		}
+
+		for (unsigned i = 0; i < lineCount - 1; i++) {
+			temp.clear();
+			std::getline(in, temp);
+			fileInfo.append(temp);
+			fileInfo.append("\n");
+		}
+
+		std::ofstream out(csvName, std::ofstream::trunc);
+		out << fileInfo;
+	}
 }
 
 std::string StringParser::ParseRawToCSV(std::string str)
@@ -149,6 +179,7 @@ std::string StringParser::ParseRawToCSV(std::string str)
 			token.insert(0, "+");
 		}
 	}
+	token.insert(0, "'");
 	output.append(token);
 	return output;
 }
@@ -170,7 +201,7 @@ std::string StringParser::CraftFullCSVRow(std::string inSR, std::string inNotes)
 			i++;
 		}
 	}
-
+	row.append("'");
 	row.append(inSR);
 	row.push_back(',');
 

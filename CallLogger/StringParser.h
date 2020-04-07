@@ -4,6 +4,8 @@
 class StringParser {
 public:
 	void OutputToCSV(std::string inSR, std::string inNotes);
+	void RemoveLastLine(void);
+	const std::string csvName = "CallLog.csv";
 private:
 	TimeClock m_timer;
 	std::string ParseRawToCSV(std::string str);

@@ -131,7 +131,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	hwnd = CreateWindowEx(
 		WS_EX_CLIENTEDGE,
 		g_szClassName,
-		"Call Logger v0.0.0",
+		"Call Logger v0.0.1",
 		WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT, CW_USEDEFAULT, 500, 500,
 		NULL, NULL, hInstance, NULL);

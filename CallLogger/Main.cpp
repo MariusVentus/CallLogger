@@ -95,10 +95,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			stringNote = rawNote;
 			std::string lastLineString = "";
 			lastLineString = g_crafter.OutputToCSV(stringSR, stringNote);
-			char lastLine[100];
+			char lastLine[100] = "";
 			for (unsigned i = 0; i < lastLineString.size() && i < 100; i++) {
 				lastLine[i] = lastLineString[i];
 			}
+			SetWindowText(hLastLine, "");
 			SetWindowText(hLastLine, lastLine);
 			break;
 		}

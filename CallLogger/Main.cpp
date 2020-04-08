@@ -14,7 +14,7 @@ StringParser g_crafter;
 #define ID_UNDO 9005
 #define IDC_MAIN_EDIT 101
 
-HWND hID, hNote;
+HWND hID, hNote, hLastLine;
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -32,20 +32,28 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		AppendMenu(hMenu, MF_STRING, ID_HELP, "Help");
 
 		SetMenu(hwnd, hMenu);
-
+		//SR
 		CreateWindowEx(WS_EX_CLIENTEDGE, "STATIC", "SR",
 			WS_CHILD | WS_VISIBLE,
 			15, 10, 450, 25, hwnd, NULL, GetModuleHandle(NULL), NULL);
 		hID = CreateWindowEx(WS_EX_CLIENTEDGE, "EDIT", "SR#123456789",
 			WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_MULTILINE | ES_AUTOVSCROLL,
 			15, 35, 450, 25, hwnd, (HMENU)IDC_MAIN_EDIT, GetModuleHandle(NULL), NULL);
+		//Notes
 		CreateWindowEx(WS_EX_CLIENTEDGE, "STATIC", "Raw Notes (Per Call):",
 			WS_CHILD | WS_VISIBLE,
 			15, 60, 450, 25, hwnd, NULL, GetModuleHandle(NULL), NULL);
 		hNote = CreateWindowEx(WS_EX_CLIENTEDGE, "EDIT", "@X Time called Y Number",
 			WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_MULTILINE | ES_AUTOVSCROLL,
-			15, 85, 450, 250, hwnd, (HMENU)IDC_MAIN_EDIT, GetModuleHandle(NULL), NULL);
-
+			15, 85, 450, 200, hwnd, (HMENU)IDC_MAIN_EDIT, GetModuleHandle(NULL), NULL);
+		//Last Added Line
+		CreateWindowEx(WS_EX_CLIENTEDGE, "STATIC", "Last Added Line:",
+			WS_CHILD | WS_VISIBLE,
+			15, 285, 450, 25, hwnd, NULL, GetModuleHandle(NULL), NULL);
+		hLastLine = CreateWindowEx(WS_EX_CLIENTEDGE, "EDIT", "Date, SR, Time, Phone Number",
+			WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL,
+			15, 310, 450, 25, hwnd, (HMENU)IDC_MAIN_EDIT, GetModuleHandle(NULL), NULL);
+		//Buttons
 		CreateWindowEx(WS_EX_CLIENTEDGE, "Button", "Parse n Add", WS_CHILD | WS_VISIBLE,
 			25, 350, 200, 50, hwnd, (HMENU)ID_PARSE, GetModuleHandle(NULL), NULL);
 		CreateWindowEx(WS_EX_CLIENTEDGE, "Button", "Remove CSV Last Line", WS_CHILD | WS_VISIBLE,
@@ -71,7 +79,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			PostQuitMessage(0);
 			break;
 		case ID_HELP:
-			MessageBox(hwnd, "I made this in an hour while eating breakfast. There is no help, only Zuul. Or ping me on Teams.", "Halp", MB_OK | MB_ICONINFORMATION);
+			MessageBox(hwnd, "I made this in an hour while eating breakfast. There is no help, only Zuul. \nOr ping me on Teams. ;) \n\nOr the Readme on Github: https://github.com/MariusVentus/CallLogger/blob/master/README.md", "Halp", MB_OK | MB_ICONINFORMATION);
 			break;
 		case ID_UNDO:
 			g_crafter.RemoveLastLine();
@@ -85,7 +93,13 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			GetWindowText(hNote, rawNote, 1000);
 			stringSR = srNum;
 			stringNote = rawNote;
-			g_crafter.OutputToCSV(stringSR, stringNote);
+			std::string lastLineString = "";
+			lastLineString = g_crafter.OutputToCSV(stringSR, stringNote);
+			char lastLine[100];
+			for (unsigned i = 0; i < lastLineString.size() && i < 100; i++) {
+				lastLine[i] = lastLineString[i];
+			}
+			SetWindowText(hLastLine, lastLine);
 			break;
 		}
 		break;
@@ -131,7 +145,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	hwnd = CreateWindowEx(
 		WS_EX_CLIENTEDGE,
 		g_szClassName,
-		"Call Logger v0.0.1",
+		"Call Logger v0.0.2",
 		WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT, CW_USEDEFAULT, 500, 500,
 		NULL, NULL, hInstance, NULL);

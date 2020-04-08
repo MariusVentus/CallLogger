@@ -10,9 +10,11 @@ V0.0.0 > Demo released. Parses and adds raw call notes to a CallLog.csv file. Au
 V0.0.1 > Added Apostraphes to numbers so Excel doesn't try to turn phone numbers into math functions, and IDs into scientific notation. 
 Removed the "Open CSV" Button (as system restrictions at work break it) and replaced with "Remove last line" button. 
 
+V0.0.2 > Added a "Show Last Line" box since I keep forgetting where I am. 
+
 Planned Features (Warning: Doing this for fun in my free time. Updates will be slow, if at all)
 
-1.) Box showing the last added line. Also, make a new Open Button.
+1.) Box showing the last added line. <Done> Also, make a new Open Button. <Next>
 
 2.) Date box showing the current date, with override options to add calls from previous days.
 

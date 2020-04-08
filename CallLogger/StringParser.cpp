@@ -1,7 +1,7 @@
 #include "StringParser.h"
 #include <fstream>
 
-void StringParser::OutputToCSV(std::string inSR, std::string inNotes)
+std::string StringParser::OutputToCSV(std::string inSR, std::string inNotes)
 {
 
 	std::ifstream in(csvName);
@@ -12,6 +12,8 @@ void StringParser::OutputToCSV(std::string inSR, std::string inNotes)
 
 	std::ofstream out(csvName, std::ofstream::app);
 	out << CraftFullCSVRow(inSR, inNotes) << "\n";
+
+	return CraftFullCSVRow(inSR, inNotes);
 }
 
 void StringParser::RemoveLastLine(void)

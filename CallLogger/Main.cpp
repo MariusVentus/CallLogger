@@ -97,7 +97,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			}
 			break;
 		case ID_STAMPLOG:
-			MessageBox(hwnd, "Stamping is still in development.", "I'll get around to it eventually.", MB_OK | MB_ICONINFORMATION);
+			if (MessageBox(hwnd, "Are you sure you want to stamp the current log?\nThis is normally done right before submission.", "Stamp Log?", MB_OKCANCEL | MB_ICONEXCLAMATION) == IDOK) {
+				g_crafter.StampCurrentLog();
+			}
 			break;
 		case ID_TRAIN_AI:
 			MessageBox(hwnd, "Apologies, at this time, note parsing is hard coded. Possible AI-related features where the logger can learn a particular note-taking style are not yet available.", "I'll get around to it eventually.", MB_OK | MB_ICONINFORMATION);

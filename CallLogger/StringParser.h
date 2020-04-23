@@ -7,6 +7,7 @@ public:
 	std::string GetCSVName(void) const { return csvName; }
 	void ClearCurrentLog(void);
 	void RemoveLastLine(void);
+	void StampCurrentLog(void);
 	
 private:
 	TimeClock m_timer;

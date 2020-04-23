@@ -1,5 +1,6 @@
 #include "StringParser.h"
 #include <fstream>
+#include <vector>
 
 std::string StringParser::OutputToCSV(std::string inSR, std::string inNotes)
 {
@@ -50,6 +51,51 @@ void StringParser::RemoveLastLine(void)
 
 		std::ofstream out(csvName, std::ofstream::trunc);
 		out << fileInfo;
+	}
+}
+
+void StringParser::StampCurrentLog(void)
+{
+	std::ifstream in(csvName);
+	if (in) {
+		std::ifstream count(csvName);
+		std::string temp;
+		std::vector<std::string> srCount;
+		unsigned lineCount = 0;
+		do {
+			temp.clear();
+			std::getline(count, temp);
+			if (!temp.empty()) {
+				lineCount++;
+			}
+		} while (!count.eof() && !temp.empty());
+
+		if (lineCount > 1) {
+			std::getline(in, temp);
+			temp.clear();
+			std::getline(in, temp);
+			temp.erase(0, temp.find(',') + 1);
+			temp.erase(temp.find(','));
+			srCount.push_back(temp);
+
+			for (unsigned i = 2; i < lineCount; i++) {
+				std::getline(in, temp);
+				temp.erase(0, temp.find(',') + 1);
+				temp.erase(temp.find(','));
+				for (unsigned j = 0; j < srCount.size(); j++) {
+					if (srCount[j] == temp) {
+						break;
+					}
+					else if (j == srCount.size() - 1) {
+						srCount.push_back(temp);
+						break;
+					}
+				}
+			}
+
+			std::ofstream out(csvName, std::ofstream::app);
+			out << "  Total Cases:  ,'" << srCount.size() << ",  Total Calls:  ,'" << lineCount - 1 << "\n";
+		}
 	}
 }
 

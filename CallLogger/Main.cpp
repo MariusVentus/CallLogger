@@ -149,12 +149,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	wc.cbClsExtra = 0;
 	wc.cbWndExtra = 0;
 	wc.hInstance = hInstance;
-	wc.hIcon = LoadIcon(NULL, IDI_APPLICATION);
 	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wc.hbrBackground = CreateSolidBrush(RGB(27, 32, 45));
 	wc.lpszMenuName = NULL;
 	wc.lpszClassName = g_szClassName;
-	wc.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
+	wc.hIconSm = (HICON)LoadImage(hInstance, "Resources\\CL Logo.ico", IMAGE_ICON, 16, 16, LR_LOADFROMFILE);
+	wc.hIcon = (HICON)LoadImage(hInstance, "Resources\\CL Logo.ico", IMAGE_ICON, 16, 16, LR_LOADFROMFILE);
+
 
 	if (!RegisterClassEx(&wc))
 	{

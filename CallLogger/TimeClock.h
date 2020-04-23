@@ -9,6 +9,7 @@ public:
 	std::string GetDate(void) const;
 	std::string GetDateNDay(void) const;
 	std::string GetDay(void) const;
+	void SetTime(const std::string& inTime) { m_time = inTime; }
 private:
 	std::string m_time;
 };

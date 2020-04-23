@@ -4,7 +4,7 @@
 #include "StringParser.h"
 
 
-const char g_szClassName[] = "myWindowClass";
+const char g_szClassName[] = "CallLoggerMainWindow";
 StringParser g_crafter;
 
 #define ID_FILE_EXIT 9001
@@ -12,6 +12,11 @@ StringParser g_crafter;
 #define ID_TRAIN_AI 9003
 #define ID_PARSE 9004
 #define ID_UNDO 9005
+#define ID_ABOUT 9006
+#define ID_WORKDAYS 9007
+#define ID_OPENLOG 9008
+#define ID_CLEARLOG 9009
+#define ID_STAMPLOG 9010
 #define IDC_MAIN_EDIT 101
 
 HWND hID, hNote, hLastLine;
@@ -21,14 +26,25 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	switch (msg)
 	{
 	case WM_CREATE:
-		HMENU hMenu, hSubMenu;
+		HMENU hMenu, hFileMenu, hSettingsMenu;
 
 		hMenu = CreateMenu();
-		hSubMenu = CreatePopupMenu();
-		AppendMenu(hSubMenu, MF_STRING, ID_TRAIN_AI, "Learn my Notes");
-		AppendMenu(hSubMenu, MF_STRING, ID_FILE_EXIT, "Exit");
-		AppendMenu(hMenu, MF_STRING | MF_POPUP, (UINT)hSubMenu, "File");
+		//File Menu
+		hFileMenu = CreatePopupMenu();
+		AppendMenu(hFileMenu, MF_STRING, ID_OPENLOG, "Open Current Log");
+		AppendMenu(hFileMenu, MF_STRING, ID_CLEARLOG, "Clear Current Log");
+		AppendMenu(hFileMenu, MF_STRING, ID_STAMPLOG, "Stamp Current Log");
+		AppendMenu(hFileMenu, MF_STRING, ID_TRAIN_AI, "Learn my Notes");
+		AppendMenu(hFileMenu, MF_SEPARATOR, NULL, NULL);
+		AppendMenu(hFileMenu, MF_STRING, ID_FILE_EXIT, "Exit");
+		AppendMenu(hMenu, MF_STRING | MF_POPUP, (UINT)hFileMenu, "File");
+		//Settings Menu
+		hSettingsMenu = CreateMenu();
+		AppendMenu(hSettingsMenu, MF_STRING, ID_WORKDAYS, "Workdays");
+		AppendMenu(hMenu, MF_STRING | MF_POPUP, (UINT)hSettingsMenu, "Settings");
 
+		//Remaining Main Menu Items
+		AppendMenu(hMenu, MF_STRING, ID_ABOUT, "About");
 		AppendMenu(hMenu, MF_STRING, ID_HELP, "Help");
 
 		SetMenu(hwnd, hMenu);
@@ -72,35 +88,39 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_COMMAND:
 		switch (wParam)
 		{
+		case ID_OPENLOG:
+			ShellExecute(hwnd, "open", g_crafter.GetCSVName().c_str(), NULL, NULL, SW_SHOW);
+			break;
+		case ID_CLEARLOG:
+			break;
+		case ID_STAMPLOG:
+			break;
 		case ID_TRAIN_AI:
 			MessageBox(hwnd, "Apologies, at this time, note parsing is hard coded. Possible AI-related features where the logger can learn a particular note-taking style are not yet available.", "I'll get around to it eventually.", MB_OK | MB_ICONINFORMATION);
 			break;
 		case ID_FILE_EXIT:
 			PostQuitMessage(0);
 			break;
+		case ID_ABOUT:
+			MessageBox(hwnd, "I originally made this in an hour while eating breakfast. \nSmall tweaks have been added since then, mostly at breakfast.\n\nThat is all.", "About", MB_OK | MB_ICONINFORMATION);
+			break;
 		case ID_HELP:
-			MessageBox(hwnd, "I made this in an hour while eating breakfast. There is no help, only Zuul. \nOr ping me on Teams. ;) \n\nOr the Readme on Github: https://github.com/MariusVentus/CallLogger/blob/master/README.md", "Halp", MB_OK | MB_ICONINFORMATION);
+			MessageBox(hwnd, "There is no help, only Zuul. \nOr ping me on Teams. ;) \n\nOr the Readme on Github: https://github.com/MariusVentus/CallLogger/blob/master/README.md", "Halp", MB_OK | MB_ICONINFORMATION);
 			break;
 		case ID_UNDO:
 			g_crafter.RemoveLastLine();
 			break;
 		case ID_PARSE:
-			char srNum[100];
-			char rawNote[1000];
+			char srNum[100] = "";
+			char rawNote[1000] = "";
 			std::string stringSR;
 			std::string stringNote;
 			GetWindowText(hID, srNum, 100);
 			GetWindowText(hNote, rawNote, 1000);
 			stringSR = srNum;
 			stringNote = rawNote;
-			std::string lastLineString = "";
-			lastLineString = g_crafter.OutputToCSV(stringSR, stringNote);
-			char lastLine[100] = "";
-			for (unsigned i = 0; i < lastLineString.size() && i < 100; i++) {
-				lastLine[i] = lastLineString[i];
-			}
-			SetWindowText(hLastLine, "");
-			SetWindowText(hLastLine, lastLine);
+
+			SetWindowText(hLastLine, g_crafter.OutputToCSV(stringSR, stringNote).c_str());
 			break;
 		}
 		break;
@@ -146,7 +166,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	hwnd = CreateWindowEx(
 		WS_EX_CLIENTEDGE,
 		g_szClassName,
-		"Call Logger v0.0.2",
+		"Call Logger v0.0.3",
 		WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT, CW_USEDEFAULT, 500, 500,
 		NULL, NULL, hInstance, NULL);

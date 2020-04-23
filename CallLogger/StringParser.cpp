@@ -16,6 +16,12 @@ std::string StringParser::OutputToCSV(std::string inSR, std::string inNotes)
 	return CraftFullCSVRow(inSR, inNotes);
 }
 
+void StringParser::ClearCurrentLog(void)
+{
+	std::ofstream out(csvName, std::ofstream::trunc);
+	out << "  Date  ,  SR#  ,  Time  ,  Phone#  \n";
+}
+
 void StringParser::RemoveLastLine(void)
 {
 	std::ifstream in(csvName);

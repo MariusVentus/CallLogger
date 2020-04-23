@@ -92,8 +92,12 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			ShellExecute(hwnd, "open", g_crafter.GetCSVName().c_str(), NULL, NULL, SW_SHOW);
 			break;
 		case ID_CLEARLOG:
+			if (MessageBox(hwnd, "Are you sure you want to clear the current log?\nThis will erase EVERYTHING.", "Clear Log?", MB_OKCANCEL | MB_ICONERROR) == IDOK) {
+				g_crafter.ClearCurrentLog();
+			}
 			break;
 		case ID_STAMPLOG:
+			MessageBox(hwnd, "Stamping is still in development.", "I'll get around to it eventually.", MB_OK | MB_ICONINFORMATION);
 			break;
 		case ID_TRAIN_AI:
 			MessageBox(hwnd, "Apologies, at this time, note parsing is hard coded. Possible AI-related features where the logger can learn a particular note-taking style are not yet available.", "I'll get around to it eventually.", MB_OK | MB_ICONINFORMATION);
@@ -119,7 +123,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			GetWindowText(hNote, rawNote, 1000);
 			stringSR = srNum;
 			stringNote = rawNote;
-
 			SetWindowText(hLastLine, g_crafter.OutputToCSV(stringSR, stringNote).c_str());
 			break;
 		}

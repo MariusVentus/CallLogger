@@ -65,7 +65,7 @@ void StringParser::StampCurrentLog(void)
 		do {
 			temp.clear();
 			std::getline(count, temp);
-			if (!temp.empty()) {
+			if (!temp.empty() && temp.find("Total Cases") == std::string::npos) {
 				lineCount++;
 			}
 		} while (!count.eof() && !temp.empty());
@@ -74,12 +74,16 @@ void StringParser::StampCurrentLog(void)
 			std::getline(in, temp);
 			temp.clear();
 			std::getline(in, temp);
+
+			while (temp.find("Total Cases") != std::string::npos) { std::getline(in, temp); }
+			
 			temp.erase(0, temp.find(',') + 1);
 			temp.erase(temp.find(','));
 			srCount.push_back(temp);
 
 			for (unsigned i = 2; i < lineCount; i++) {
 				std::getline(in, temp);
+				while (temp.find("Total Cases") != std::string::npos) { std::getline(in, temp); }
 				temp.erase(0, temp.find(',') + 1);
 				temp.erase(temp.find(','));
 				for (unsigned j = 0; j < srCount.size(); j++) {

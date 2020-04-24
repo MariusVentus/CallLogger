@@ -1,11 +1,13 @@
 #include <windows.h>
 #include <locale>
 #include <codecvt>
+#include "SettingsHandler.h"
 #include "StringParser.h"
 
 
 const char g_szClassName[] = "CallLoggerMainWindow";
 StringParser g_crafter;
+SettingsHandler g_settings;
 
 #define ID_FILE_EXIT 9001
 #define ID_HELP 9002
@@ -13,13 +15,18 @@ StringParser g_crafter;
 #define ID_PARSE 9004
 #define ID_UNDO 9005
 #define ID_ABOUT 9006
-#define ID_WORKDAYS 9007
+#define ID_SETTINGSMENU_GENERAL 9007
 #define ID_OPENLOG 9008
 #define ID_CLEARLOG 9009
 #define ID_STAMPLOG 9010
 #define IDC_MAIN_EDIT 101
 
-HWND hID, hNote, hLastLine;
+HWND hMainWindow, hID, hNote, hLastLine;
+void RegisterSettingsWindow(HINSTANCE hInst);
+void OpenSettingsWindow(HWND hWnd);
+LRESULT CALLBACK SetWinProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp);
+
+
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -40,7 +47,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		AppendMenu(hMenu, MF_STRING | MF_POPUP, (UINT)hFileMenu, "File");
 		//Settings Menu
 		hSettingsMenu = CreateMenu();
-		AppendMenu(hSettingsMenu, MF_STRING, ID_WORKDAYS, "Workdays");
+		AppendMenu(hSettingsMenu, MF_STRING, ID_SETTINGSMENU_GENERAL, "General");
 		AppendMenu(hMenu, MF_STRING | MF_POPUP, (UINT)hSettingsMenu, "Settings");
 
 		//Remaining Main Menu Items
@@ -107,6 +114,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		case ID_FILE_EXIT:
 			PostQuitMessage(0);
 			break;
+		case ID_SETTINGSMENU_GENERAL:
+			OpenSettingsWindow(hwnd);
+			break;
 		case ID_ABOUT:
 			MessageBox(hwnd, "I originally made this in an hour while eating breakfast. \nSmall tweaks have been added since then, mostly at breakfast.\n\nThat is all.", "About", MB_OK | MB_ICONINFORMATION);
 			break;
@@ -144,8 +154,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	LPSTR lpCmdLine, int nCmdShow)
 {
-	WNDCLASSEX wc;
-	HWND hwnd;
+	WNDCLASSEX wc = { 0 };
 	MSG Msg;
 
 	wc.cbSize = sizeof(WNDCLASSEX);
@@ -169,23 +178,25 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 		return 0;
 	}
 
-	hwnd = CreateWindowEx(
+	RegisterSettingsWindow(hInstance);
+
+	hMainWindow = CreateWindowEx(
 		WS_EX_CLIENTEDGE,
 		g_szClassName,
-		"Call Logger v0.0.3",
+		"Call Logger v0.0.7",
 		WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT, CW_USEDEFAULT, 500, 500,
 		NULL, NULL, hInstance, NULL);
 
-	if (hwnd == NULL)
+	if (hMainWindow == NULL)
 	{
 		MessageBox(NULL, "Window Creation Failed!", "Error!",
 			MB_ICONEXCLAMATION | MB_OK);
 		return 0;
 	}
 
-	ShowWindow(hwnd, nCmdShow);
-	UpdateWindow(hwnd);
+	ShowWindow(hMainWindow, nCmdShow);
+	UpdateWindow(hMainWindow);
 
 	while (GetMessage(&Msg, NULL, 0, 0) > 0)
 	{
@@ -193,4 +204,60 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 		DispatchMessage(&Msg);
 	}
 	return Msg.wParam;
+}
+
+void RegisterSettingsWindow(HINSTANCE hInst) {
+	WNDCLASSEX setWin = { 0 };
+
+	setWin.cbSize = sizeof(WNDCLASSEX);
+	setWin.style = 0;
+	setWin.lpfnWndProc = SetWinProc;
+	setWin.cbClsExtra = 0;
+	setWin.cbWndExtra = 0;
+	setWin.hInstance = hInst;
+	setWin.hCursor = LoadCursor(NULL, IDC_ARROW);
+	setWin.hbrBackground = (HBRUSH)COLOR_WINDOW;
+	setWin.lpszMenuName = NULL;
+	setWin.lpszClassName = "mySettingsWindow";
+
+	RegisterClassEx(&setWin);
+}
+
+void OpenSettingsWindow(HWND hWnd) {
+	HWND hSetWindow = CreateWindowEx(WS_EX_CLIENTEDGE, "mySettingsWindow", "Settings", WS_VISIBLE | WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 400, 200, hWnd, NULL, NULL, NULL);
+
+	if (hSetWindow == NULL)
+	{
+		MessageBox(NULL, "Window Creation Failed!", "Error!",
+			MB_ICONEXCLAMATION | MB_OK);
+	}
+
+	CreateWindowEx(WS_EX_CLIENTEDGE, "button", "Close", WS_VISIBLE | WS_CHILD, 20, 20, 100, 40, hSetWindow, (HMENU)1, NULL, NULL);
+
+	//Disable the main window, turning a Modless dialogue box into a modal dialogue
+	EnableWindow(hWnd, false);
+}
+
+
+LRESULT CALLBACK SetWinProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
+	switch (msg) {
+	case WM_COMMAND:
+		switch (wp)
+		{
+		case 1:
+			EnableWindow(hMainWindow, true);
+			DestroyWindow(hWnd);
+			break;
+		default:
+			break;
+		}
+		break;
+	case WM_CLOSE:
+		EnableWindow(hMainWindow, true);
+		DestroyWindow(hWnd);
+		break;
+	default:
+		return DefWindowProc(hWnd, msg, wp, lp);
+	}
+	return 0;
 }

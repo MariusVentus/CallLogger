@@ -224,15 +224,38 @@ void RegisterSettingsWindow(HINSTANCE hInst) {
 }
 
 void OpenSettingsWindow(HWND hWnd) {
-	HWND hSetWindow = CreateWindowEx(WS_EX_CLIENTEDGE, "mySettingsWindow", "Settings", WS_VISIBLE | WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 400, 200, hWnd, NULL, NULL, NULL);
-
+	HWND hSetWindow = CreateWindowEx(WS_EX_CLIENTEDGE, "mySettingsWindow", "Settings", WS_VISIBLE | WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 300, 400, hWnd, NULL, NULL, NULL);
+	
 	if (hSetWindow == NULL)
 	{
 		MessageBox(NULL, "Window Creation Failed!", "Error!",
 			MB_ICONEXCLAMATION | MB_OK);
 	}
 
-	CreateWindowEx(WS_EX_CLIENTEDGE, "button", "Close", WS_VISIBLE | WS_CHILD, 20, 20, 100, 40, hSetWindow, (HMENU)1, NULL, NULL);
+	CreateWindowEx(NULL, "STATIC", "Weekly Auto-Splitting", WS_CHILD | WS_VISIBLE, 20, 10, 200, 25, hSetWindow, NULL, GetModuleHandle(NULL), NULL);
+	CreateWindowEx(NULL, "button", "Enabled", WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX, 20, 35, 80, 40, hSetWindow, (HMENU)10, NULL, NULL);
+
+	if (g_settings.GetAutoSplit()) {
+		CheckDlgButton(hSetWindow, 10, BST_CHECKED);
+	}
+
+	CreateWindowEx(NULL, "STATIC", "My Workdays", WS_CHILD | WS_VISIBLE, 20, 80, 200, 25, hSetWindow, NULL, GetModuleHandle(NULL), NULL);
+	CreateWindowEx(NULL, "button", "Sun", WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX, 30, 110, 80, 40, hSetWindow, (HMENU)3, NULL, NULL);
+	CreateWindowEx(NULL, "button", "Mon", WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX, 120, 110, 80, 40, hSetWindow, (HMENU)4, NULL, NULL);
+	CreateWindowEx(NULL, "button", "Tue", WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX, 30, 155, 80, 40, hSetWindow, (HMENU)5, NULL, NULL);
+	CreateWindowEx(NULL, "button", "Wed", WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX, 120, 155, 80, 40, hSetWindow, (HMENU)6, NULL, NULL);
+	CreateWindowEx(NULL, "button", "Thur", WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX, 30, 200, 80, 40, hSetWindow, (HMENU)7, NULL, NULL);
+	CreateWindowEx(NULL, "button", "Fri", WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX, 120, 200, 80, 40, hSetWindow, (HMENU)8, NULL, NULL);
+	CreateWindowEx(NULL, "button", "Sat", WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX, 30, 245, 80, 40, hSetWindow, (HMENU)9, NULL, NULL);
+
+	for (unsigned i = 0; i < 7; i++) {
+		if (g_settings.GetWorkday(i)) {
+			CheckDlgButton(hSetWindow, i + 3, BST_CHECKED);
+		}
+	}
+
+	CreateWindowEx(WS_EX_CLIENTEDGE, "button", "Ok", WS_VISIBLE | WS_CHILD, 25, 300, 100, 40, hSetWindow, (HMENU)IDOK, NULL, NULL);
+	CreateWindowEx(WS_EX_CLIENTEDGE, "button", "Cancel", WS_VISIBLE | WS_CHILD, 150, 300, 100, 40, hSetWindow, (HMENU)IDCANCEL, NULL, NULL);
 
 	//Disable the main window, turning a Modless dialogue box into a modal dialogue
 	EnableWindow(hWnd, false);
@@ -244,9 +267,38 @@ LRESULT CALLBACK SetWinProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
 	case WM_COMMAND:
 		switch (wp)
 		{
-		case 1:
+		case IDOK:
+			g_settings.SaveSettingsToFile();
 			EnableWindow(hMainWindow, true);
 			DestroyWindow(hWnd);
+			break;
+		case IDCANCEL:
+			EnableWindow(hMainWindow, true);
+			DestroyWindow(hWnd);
+			break;
+		case 10:
+			g_settings.SetAutoSplit(!g_settings.GetAutoSplit()); 
+			break;
+		case 3:
+			g_settings.SetWorkday(0, !g_settings.GetWorkday(0)); //Sun
+			break;
+		case 4:
+			g_settings.SetWorkday(1, !g_settings.GetWorkday(1)); //Mon
+			break;
+		case 5:
+			g_settings.SetWorkday(2, !g_settings.GetWorkday(2)); //Tue
+			break;
+		case 6:
+			g_settings.SetWorkday(3, !g_settings.GetWorkday(3)); // Wed
+			break;
+		case 7:
+			g_settings.SetWorkday(4, !g_settings.GetWorkday(4)); //Thur
+			break;
+		case 8:
+			g_settings.SetWorkday(5, !g_settings.GetWorkday(5)); //Fri
+			break;
+		case 9:
+			g_settings.SetWorkday(6, !g_settings.GetWorkday(6)); //Sat
 			break;
 		default:
 			break;

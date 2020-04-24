@@ -45,6 +45,28 @@ SettingsHandler::SettingsHandler(void)
 
 }
 
+void SettingsHandler::SaveSettingsToFile(void)
+{
+	std::ofstream out(m_SettingsFile, std::ofstream::trunc);
+	out << "[AutoSplit Logs]\n";
+	if (m_AutoSplitLogs) {
+		out << "true\n";
+	}
+	else {
+		out << "false\n";
+	}
+	out << "[Workdays]\n";
+	for (unsigned i = 0; i < 7;i++) {
+		if (m_WorkDays[i]) {
+			out << "t,";
+		}
+		else {
+			out << "f,";
+		}
+	}
+
+}
+
 bool SettingsHandler::StoB(const std::string& inStr) const
 {
 	if (inStr == "true" || inStr == "True") {

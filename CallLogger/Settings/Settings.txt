@@ -1,4 +1,4 @@
 [AutoSplit Logs]
 true
 [Workdays]
-t,t,t,t,t,t,t
+t,t,t,t,t,t,t,

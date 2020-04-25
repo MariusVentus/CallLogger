@@ -6,6 +6,7 @@
 
 
 const char g_szClassName[] = "CallLoggerMainWindow";
+const char g_MainWindowTitle[] = "Call Logger v0.0.8";
 StringParser g_crafter;
 SettingsHandler g_settings;
 
@@ -118,7 +119,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			OpenSettingsWindow(hwnd);
 			break;
 		case ID_ABOUT:
-			MessageBox(hwnd, "I originally made this in an hour while eating breakfast. \nSmall tweaks have been added since then, mostly at breakfast.\n\nThat is all.", "About", MB_OK | MB_ICONINFORMATION);
+			MessageBox(hwnd, "This was originally made in an hour while eating breakfast. \nOver time, it has ballooned into a project made over many hours, breakfasts, some lunches, a few dinners, and even squeezed into a few breaks.\n\nIt's far from perfect, but I am happy with the progress, and I hope it helps!\n....\n\nThat is all.", "About", MB_OK | MB_ICONINFORMATION);
 			break;
 		case ID_HELP:
 			MessageBox(hwnd, "There is no help, only Zuul. \nOr ping me on Teams. ;) \n\nOr the Readme on Github: https://github.com/MariusVentus/CallLogger/blob/master/README.md", "Halp", MB_OK | MB_ICONINFORMATION);
@@ -183,7 +184,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	hMainWindow = CreateWindowEx(
 		WS_EX_CLIENTEDGE,
 		g_szClassName,
-		"Call Logger v0.0.7",
+		g_MainWindowTitle,
 		WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT, CW_USEDEFAULT, 500, 500,
 		NULL, NULL, hInstance, NULL);
@@ -219,6 +220,8 @@ void RegisterSettingsWindow(HINSTANCE hInst) {
 	setWin.hbrBackground = (HBRUSH)COLOR_WINDOW;
 	setWin.lpszMenuName = NULL;
 	setWin.lpszClassName = "mySettingsWindow";
+	setWin.hIconSm = (HICON)LoadImage(hInst, "Resources\\CL Logo.ico", IMAGE_ICON, 16, 16, LR_LOADFROMFILE);
+
 
 	RegisterClassEx(&setWin);
 }
@@ -273,6 +276,7 @@ LRESULT CALLBACK SetWinProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
 			DestroyWindow(hWnd);
 			break;
 		case IDCANCEL:
+			g_settings.ResetSettings();
 			EnableWindow(hMainWindow, true);
 			DestroyWindow(hWnd);
 			break;

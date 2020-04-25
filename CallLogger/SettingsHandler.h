@@ -6,9 +6,12 @@ public:
 	SettingsHandler(void);
 	bool GetAutoSplit(void) const { return m_AutoSplitLogs; }
 	bool GetWorkday(unsigned day) const { return m_WorkDays[day]; }
+	void ResetSettings(void);
 	void SetAutoSplit(bool split) { m_AutoSplitLogs = split; }
 	void SetWorkday(unsigned dayX, bool inSet) { m_WorkDays[dayX] = inSet; }
 	void SaveSettingsToFile(void);
+	unsigned GetFirstDayOfWeek(void) const;
+	unsigned GetLastDayOfWeek(void) const;
 
 private:
 	const std::string m_SettingsFile = "Settings\\Settings.txt";

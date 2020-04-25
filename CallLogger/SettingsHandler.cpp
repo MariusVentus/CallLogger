@@ -3,6 +3,12 @@
 
 SettingsHandler::SettingsHandler(void)
 {
+	ResetSettings();
+
+}
+
+void SettingsHandler::ResetSettings(void)
+{
 	std::ifstream in(m_SettingsFile);
 	if (in) {
 		std::string temp = "";
@@ -18,20 +24,19 @@ SettingsHandler::SettingsHandler(void)
 				std::getline(in, temp);
 				char tc = temp.back();
 				unsigned dc = 6;
-				temp.pop_back();
 				do {
+					temp.pop_back();
 					if (tc != ',') {
 						if (tc == 't') {
 							SetWorkday(dc, true);
-							dc--;
+							if (dc > 0) { dc--; }
 						}
 						else if (tc == 'f') {
 							SetWorkday(dc, false);
-							dc--;
+							if (dc > 0) { dc--; }
 						}
 					}
-					tc = temp.back();
-					temp.pop_back();
+					if (!temp.empty()) { tc = temp.back(); }
 				} while (!temp.empty());
 			}
 
@@ -42,7 +47,6 @@ SettingsHandler::SettingsHandler(void)
 		std::ofstream out(m_SettingsFile, std::ofstream::trunc);
 		out << "[AutoSplit Logs]\ntrue\n[Workdays]\nt,t,t,t,t,t,t";
 	}
-
 }
 
 void SettingsHandler::SaveSettingsToFile(void)
@@ -65,6 +69,26 @@ void SettingsHandler::SaveSettingsToFile(void)
 		}
 	}
 
+}
+
+unsigned SettingsHandler::GetFirstDayOfWeek(void) const
+{
+	for (unsigned i = 0; i < 7; i++) {
+		if (m_WorkDays[i]) {
+			return i;
+		}
+	}
+	return 0;
+}
+
+unsigned SettingsHandler::GetLastDayOfWeek(void) const
+{
+	for (unsigned i = 7; i > 0; i--) {
+		if (m_WorkDays[i-1]) {
+			return i-1;
+		}
+	}
+	return 6;
 }
 
 bool SettingsHandler::StoB(const std::string& inStr) const

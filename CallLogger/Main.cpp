@@ -7,7 +7,7 @@
 
 
 const char g_szClassName[] = "CallLoggerMainWindow";
-const char g_MainWindowTitle[] = "Call Logger v0.0.9";
+const char g_MainWindowTitle[] = "Call Logger v0.1.0";
 SettingsHandler g_Settings;
 TimeClock g_Timeclock;
 StringParser g_Crafter(g_Settings, g_Timeclock);
@@ -27,7 +27,8 @@ StringParser g_Crafter(g_Settings, g_Timeclock);
 #define ID_RESETDATE 9013
 #define IDC_MAIN_EDIT 101
 
-HWND hMainWindow, hDate, hCSVDisplay, hID, hNote, hLastLine;
+HWND hMainWindow, hLogo, hDate, hCSVDisplay, hID, hNote, hLastLine;
+HBITMAP hLogoImage;
 void RegisterSettingsWindow(HINSTANCE hInst);
 void OpenSettingsWindow(HWND hWnd);
 LRESULT CALLBACK SetWinProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp);
@@ -39,8 +40,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	switch (msg)
 	{
 	case WM_CREATE:
+//MENU
 		HMENU hMenu, hFileMenu, hSettingsMenu;
-
 		hMenu = CreateMenu();
 		//File Menu
 		hFileMenu = CreatePopupMenu();
@@ -61,48 +62,58 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		AppendMenu(hMenu, MF_STRING, ID_HELP, "Help");
 
 		SetMenu(hwnd, hMenu);
+
+//MAIN SCREEN 
+		//Logo and Title --------------------------------------------------
+		hLogoImage = (HBITMAP)LoadImage(NULL, "Resources\\CL Banner.bmp", IMAGE_BITMAP, 480, 50, LR_LOADFROMFILE);
+		if (hLogoImage == NULL) { MessageBox(hwnd, "Could not load Logo!", "Error", MB_OK | MB_ICONEXCLAMATION); }
+		hLogo = CreateWindowEx(NULL, "static", NULL, WS_VISIBLE | WS_CHILD | SS_BITMAP, 0, 0, 480, 50, hwnd, NULL, NULL, NULL);
+		if (hLogo == NULL) { MessageBox(hwnd, "Logo window creation failed!", "Error", MB_OK | MB_ICONEXCLAMATION); }
+		SendMessage(hLogo, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hLogoImage);
+
+		//Current CSV --------------------------------------------------
+		hCSVDisplay = CreateWindowEx(WS_EX_CLIENTEDGE, "Static", g_Crafter.GetCSVNameNoPath().c_str(), WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | SS_CENTER,
+			120, 60, 240, 25, hwnd, NULL, GetModuleHandle(NULL), NULL);
 		
-		//Current CSV
-		CreateWindowEx(WS_EX_CLIENTEDGE, "STATIC", "CSV:", WS_CHILD | WS_VISIBLE, 
-			15, 110, 50, 25, hwnd, NULL, GetModuleHandle(NULL), NULL);
-		hCSVDisplay = CreateWindowEx(WS_EX_CLIENTEDGE, "Static", g_Crafter.GetCSVNameNoPath().c_str(), WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL,
-			65, 110, 400, 25, hwnd, NULL, GetModuleHandle(NULL), NULL);
-		//Date
-		CreateWindowEx(WS_EX_CLIENTEDGE, "STATIC", "Date:", WS_CHILD | WS_VISIBLE, 
-			15, 160, 50, 25, hwnd, NULL, GetModuleHandle(NULL), NULL);
-		hDate = CreateWindowEx(WS_EX_CLIENTEDGE, "Static", g_Timeclock.GetDate().c_str(), WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL,
-			65, 160, 250, 25, hwnd, NULL, GetModuleHandle(NULL), NULL);
-		CreateWindowEx(WS_EX_CLIENTEDGE, "Button", "<Shift", WS_CHILD | WS_VISIBLE,
-			315, 160, 50, 25, hwnd, (HMENU)ID_SHIFTDATEB, GetModuleHandle(NULL), NULL);
-		CreateWindowEx(WS_EX_CLIENTEDGE, "Button", "Shift>", WS_CHILD | WS_VISIBLE,
-			365, 160, 50, 25, hwnd, (HMENU)ID_SHIFTDATEF, GetModuleHandle(NULL), NULL);
-		CreateWindowEx(WS_EX_CLIENTEDGE, "Button", "Reset", WS_CHILD | WS_VISIBLE,
-			415, 160, 50, 25, hwnd, (HMENU)ID_RESETDATE, GetModuleHandle(NULL), NULL);
-		//SR
-		CreateWindowEx(WS_EX_CLIENTEDGE, "STATIC", "SR:",
-			WS_CHILD | WS_VISIBLE,
-			15, 210, 50, 25, hwnd, NULL, GetModuleHandle(NULL), NULL);
-		hID = CreateWindowEx(WS_EX_CLIENTEDGE, "EDIT", "SR#123456789", WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL,
-			65, 210, 400, 25, hwnd, (HMENU)IDC_MAIN_EDIT, GetModuleHandle(NULL), NULL);
-		//Notes
-		CreateWindowEx(WS_EX_CLIENTEDGE, "STATIC", "Raw Notes (Per Call):",
-			WS_CHILD | WS_VISIBLE,
-			15, 260, 450, 25, hwnd, NULL, GetModuleHandle(NULL), NULL);
+		//Date --------------------------------------------------
+		hDate = CreateWindowEx(WS_EX_CLIENTEDGE, "Static", g_Timeclock.GetDate().c_str(), WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | SS_CENTER ,
+			150, 95, 180, 25, hwnd, NULL, GetModuleHandle(NULL), NULL);
+		
+		//Date Buttons --------------------------------------------------
+		CreateWindowEx(WS_EX_CLIENTEDGE, "Button", "<Shift", WS_CHILD | WS_VISIBLE | SS_CENTER,
+			150, 120, 60, 25, hwnd, (HMENU)ID_SHIFTDATEB, GetModuleHandle(NULL), NULL);
+		CreateWindowEx(WS_EX_CLIENTEDGE, "Button", "Reset", WS_CHILD | WS_VISIBLE | SS_CENTER,
+			210, 120, 60, 25, hwnd, (HMENU)ID_RESETDATE, GetModuleHandle(NULL), NULL);
+		CreateWindowEx(WS_EX_CLIENTEDGE, "Button", "Shift>", WS_CHILD | WS_VISIBLE | SS_CENTER,
+			270, 120, 60, 25, hwnd, (HMENU)ID_SHIFTDATEF, GetModuleHandle(NULL), NULL);
+		
+		//SR --------------------------------------------------
+		CreateWindowEx(WS_EX_CLIENTEDGE, "STATIC", " SR: ", WS_CHILD | WS_VISIBLE | SS_CENTER,
+			15, 155, 40, 25, hwnd, NULL, GetModuleHandle(NULL), NULL);
+		hID = CreateWindowEx(WS_EX_CLIENTEDGE, "EDIT", " SR#123456789", WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL,
+			55, 155, 410, 25, hwnd, (HMENU)IDC_MAIN_EDIT, GetModuleHandle(NULL), NULL);
+
+		//Notes --------------------------------------------------
+		CreateWindowEx(WS_EX_CLIENTEDGE, "STATIC", " Raw Notes (Per Call):", WS_CHILD | WS_VISIBLE,
+			15, 185, 450, 25, hwnd, NULL, GetModuleHandle(NULL), NULL);
 		hNote = CreateWindowEx(WS_EX_CLIENTEDGE, "EDIT", "@X Time called Y Number",
 			WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_MULTILINE | ES_AUTOVSCROLL,
-			15, 285, 450, 200, hwnd, (HMENU)IDC_MAIN_EDIT, GetModuleHandle(NULL), NULL);
-		//Last Added Line
-		CreateWindowEx(WS_EX_CLIENTEDGE, "STATIC", "Last Added Line:",
-			WS_CHILD | WS_VISIBLE,
-			15, 485, 450, 25, hwnd, NULL, GetModuleHandle(NULL), NULL);
+			15, 210, 450, 200, hwnd, (HMENU)IDC_MAIN_EDIT, GetModuleHandle(NULL), NULL);
+		
+		//Last Added Line --------------------------------------------------
+		CreateWindowEx(WS_EX_CLIENTEDGE, "STATIC", " Last Added Line:", WS_CHILD | WS_VISIBLE,
+			15, 410, 450, 25, hwnd, NULL, GetModuleHandle(NULL), NULL);
 		hLastLine = CreateWindowEx(WS_EX_CLIENTEDGE, "EDIT", "Date, SR, Time, Phone Number",
 			WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL,
-			15, 510, 450, 25, hwnd, (HMENU)IDC_MAIN_EDIT, GetModuleHandle(NULL), NULL);
-		//Buttons
+			15, 435, 450, 25, hwnd, (HMENU)IDC_MAIN_EDIT, GetModuleHandle(NULL), NULL);
+		
+		//Buttons --------------------------------------------------
 		CreateWindowEx(WS_EX_CLIENTEDGE, "Button", "Parse n Add", WS_CHILD | WS_VISIBLE,
-			25, 550, 200, 50, hwnd, (HMENU)ID_PARSE, GetModuleHandle(NULL), NULL);
+			25, 470, 200, 50, hwnd, (HMENU)ID_PARSE, GetModuleHandle(NULL), NULL);
 		CreateWindowEx(WS_EX_CLIENTEDGE, "Button", "Remove CSV Last Line", WS_CHILD | WS_VISIBLE,
-			250, 550, 200, 50, hwnd, (HMENU)ID_UNDO, GetModuleHandle(NULL), NULL);
+			255, 470, 200, 50, hwnd, (HMENU)ID_UNDO, GetModuleHandle(NULL), NULL);	
+		
+//End Creation
 		break;
 //COMMANDS
 	case WM_COMMAND:
@@ -183,6 +194,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
+// -------------------------------------------------- MAIN FUNCTION ----------------------------------------------------------------------------------------------------
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	LPSTR lpCmdLine, int nCmdShow)
 {
@@ -212,13 +224,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
 	RegisterSettingsWindow(hInstance);
 
-	hMainWindow = CreateWindowEx(
-		WS_EX_CLIENTEDGE,
-		g_szClassName,
-		g_MainWindowTitle,
-		WS_OVERLAPPEDWINDOW,
-		CW_USEDEFAULT, CW_USEDEFAULT, 500, 700,
-		NULL, NULL, hInstance, NULL);
+	hMainWindow = CreateWindowEx(WS_EX_CLIENTEDGE, g_szClassName, g_MainWindowTitle, WS_OVERLAPPEDWINDOW, 
+		CW_USEDEFAULT, CW_USEDEFAULT, 500, 600, NULL, NULL, hInstance, NULL);
 
 	if (hMainWindow == NULL)
 	{

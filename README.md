@@ -1,4 +1,5 @@
 # CallLogger
+***V0.1.0***
 Super quick and super ugly call logger to make work slightly easier.
 
 Just copy call notes in, and build a call log fast! 
@@ -26,9 +27,11 @@ V0.0.8 > Auto-splits call logs each week, altering the CSV to match the normal W
 
 V0.0.9 > Date box shos current date, with Shift/Reset buttons to alter adding date. Will also change Csvs as needed, if auto-splitting enabled.
 
+V0.1.0 > Alpha! Logo added, slight tweak to the layout and visuals. Ready for use!
+
 ***Planned Features (Warning: Doing this for fun in my free time. Updates will be slow, if at all)***
 
-1.) Improved layout and "graphics." Improved code (right now it is spaghetti all shoved in main.cpp)
+1.) Improved code (right now it is spaghetti all shoved in main.cpp)
 
 2.) Possible AI "Learn your note-taking style" feature which learns how to parse based off the user. 
 Might be too ambitious, given the average user's hardware.

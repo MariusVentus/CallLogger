@@ -52,7 +52,13 @@
     <Image Include="Resources\CL Logo.ico">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="Resources\CallLoggerLogo.BMP">
+    <Image Include="Resources\CL Logo Black.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\CLLogo.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\CL Banner.bmp">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

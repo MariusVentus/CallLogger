@@ -138,8 +138,10 @@
     <ClInclude Include="TimeClock.h" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="Resources\CallLoggerLogo.BMP" />
+    <Image Include="Resources\CL Banner.bmp" />
+    <Image Include="Resources\CL Logo Black.bmp" />
     <Image Include="Resources\CL Logo.ico" />
+    <Image Include="Resources\CLLogo.bmp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.md" />

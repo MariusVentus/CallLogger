@@ -2,8 +2,9 @@
 #include <fstream>
 #include <vector>
 
-StringParser::StringParser(const SettingsHandler& inSet)
+StringParser::StringParser(const SettingsHandler& inSet, const TimeClock& inTime)
 	:
+	m_Timer(inTime),
 	m_Settings(inSet)
 {
 	SetCSVfromDate();
@@ -12,16 +13,19 @@ StringParser::StringParser(const SettingsHandler& inSet)
 std::string StringParser::OutputToCSV(std::string inSR, std::string inNotes)
 {
 
-	std::ifstream in(m_csvName);
-	if (!in) {
-		std::ofstream tempOut(m_csvName, std::ofstream::app);
-		tempOut << "  Date  ,  SR#  ,  Time  ,  Phone#  \n";
-	}
+	CheckCSV();
 
 	std::ofstream out(m_csvName, std::ofstream::app);
 	out << CraftFullCSVRow(inSR, inNotes) << "\n";
 
 	return CraftFullCSVRow(inSR, inNotes);
+}
+
+std::string StringParser::GetCSVNameNoPath(void) const
+{
+	auto str = m_csvName;
+	str.erase(0, m_csvName.find_last_of("\\") + 1);
+	return str;
 }
 
 void StringParser::ClearCurrentLog(void)
@@ -30,35 +34,44 @@ void StringParser::ClearCurrentLog(void)
 	out << "  Date  ,  SR#  ,  Time  ,  Phone#  \n";
 }
 
-void StringParser::RemoveLastLine(void)
+void StringParser::CheckCSV(void) const
 {
 	std::ifstream in(m_csvName);
-	if (in) {
-		std::ifstream count(m_csvName);
-		std::string temp;
-		std::string fileInfo;
-		unsigned lineCount = 0;
-		do {
-			temp.clear();
-			std::getline(count, temp);
-			if (!temp.empty()) {
-				lineCount++;
-			}
-		} while (!count.eof() && !temp.empty());
-		if (lineCount <= 2) {
-			lineCount = 2;
-		}
-
-		for (unsigned i = 0; i < lineCount - 1; i++) {
-			temp.clear();
-			std::getline(in, temp);
-			fileInfo.append(temp);
-			fileInfo.append("\n");
-		}
-
-		std::ofstream out(m_csvName, std::ofstream::trunc);
-		out << fileInfo;
+	if (!in) {
+		std::ofstream tempOut(m_csvName, std::ofstream::app);
+		tempOut << "  Date  ,  SR#  ,  Time  ,  Phone#  \n";
 	}
+}
+
+void StringParser::RemoveLastLine(void)
+{
+	CheckCSV();
+	std::ifstream in(m_csvName);
+	std::ifstream count(m_csvName);
+	std::string temp;
+	std::string fileInfo;
+	unsigned lineCount = 0;
+	do {
+		temp.clear();
+		std::getline(count, temp);
+		if (!temp.empty()) {
+			lineCount++;
+		}
+	} while (!count.eof() && !temp.empty());
+	if (lineCount <= 2) {
+		lineCount = 2;
+	}
+
+	for (unsigned i = 0; i < lineCount - 1; i++) {
+		temp.clear();
+		std::getline(in, temp);
+		fileInfo.append(temp);
+		fileInfo.append("\n");
+	}
+
+	std::ofstream out(m_csvName, std::ofstream::trunc);
+	out << fileInfo;
+
 }
 
 void StringParser::SetCSVfromDate(void)
@@ -67,19 +80,19 @@ void StringParser::SetCSVfromDate(void)
 	if (m_Settings.GetAutoSplit()) {
 		int first = (int)m_Settings.GetFirstDayOfWeek();
 		int last = (int)m_Settings.GetLastDayOfWeek();
-		int day = (int)m_timer.DayofWeektoInt();
+		int day = (int)m_Timer.DayofWeektoInt();
 		std::string tempDateF;
 		std::string tempDateL;
 		m_csvName.append(" ");
 
 		//Add First Day
-		tempDateF = m_timer.GetDateShiftX(first - day);
+		tempDateF = m_Timer.GetDateShiftX(first - day);
 		tempDateF.erase(tempDateF.find_last_of("-"));
 		tempDateF.replace(tempDateF.find("-"), 1, " ");
 		m_csvName.append(tempDateF);
 
 		//Add Last Day
-		tempDateL = m_timer.GetDateShiftX(last - day);
+		tempDateL = m_Timer.GetDateShiftX(last - day);
 		tempDateL.erase(tempDateL.find_last_of("-"));
 		tempDateL.replace(tempDateL.find("-"), 1, " ");
 		if (tempDateF != tempDateL) {
@@ -88,60 +101,55 @@ void StringParser::SetCSVfromDate(void)
 		}
 	}
 	m_csvName.append(m_csvFiletype);
-	std::ifstream in(m_csvName);
-	if (!in) {
-		std::ofstream tempOut(m_csvName, std::ofstream::app);
-		tempOut << "  Date  ,  SR#  ,  Time  ,  Phone#  \n";
-	}
 }
 
 void StringParser::StampCurrentLog(void)
 {
+	CheckCSV();
 	std::ifstream in(m_csvName);
-	if (in) {
-		std::ifstream count(m_csvName);
-		std::string temp;
-		std::vector<std::string> srCount;
-		unsigned lineCount = 0;
-		do {
-			temp.clear();
-			std::getline(count, temp);
-			if (!temp.empty() && temp.find("Total Cases") == std::string::npos) {
-				lineCount++;
-			}
-		} while (!count.eof() && !temp.empty());
+	std::ifstream count(m_csvName);
+	std::string temp;
+	std::vector<std::string> srCount;
+	unsigned lineCount = 0;
+	do {
+		temp.clear();
+		std::getline(count, temp);
+		if (!temp.empty() && temp.find("Total Cases") == std::string::npos) {
+			lineCount++;
+		}
+	} while (!count.eof() && !temp.empty());
 
-		if (lineCount > 1) {
-			std::getline(in, temp);
-			temp.clear();
-			std::getline(in, temp);
+	if (lineCount > 1) {
+		std::getline(in, temp);
+		temp.clear();
+		std::getline(in, temp);
 
+		while (temp.find("Total Cases") != std::string::npos) { std::getline(in, temp); }
+
+		temp.erase(0, temp.find(',') + 1);
+		temp.erase(temp.find(','));
+		srCount.push_back(temp);
+
+		for (unsigned i = 2; i < lineCount; i++) {
+			std::getline(in, temp);
 			while (temp.find("Total Cases") != std::string::npos) { std::getline(in, temp); }
-			
 			temp.erase(0, temp.find(',') + 1);
 			temp.erase(temp.find(','));
-			srCount.push_back(temp);
-
-			for (unsigned i = 2; i < lineCount; i++) {
-				std::getline(in, temp);
-				while (temp.find("Total Cases") != std::string::npos) { std::getline(in, temp); }
-				temp.erase(0, temp.find(',') + 1);
-				temp.erase(temp.find(','));
-				for (unsigned j = 0; j < srCount.size(); j++) {
-					if (srCount[j] == temp) {
-						break;
-					}
-					else if (j == srCount.size() - 1) {
-						srCount.push_back(temp);
-						break;
-					}
+			for (unsigned j = 0; j < srCount.size(); j++) {
+				if (srCount[j] == temp) {
+					break;
+				}
+				else if (j == srCount.size() - 1) {
+					srCount.push_back(temp);
+					break;
 				}
 			}
-
-			std::ofstream out(m_csvName, std::ofstream::app);
-			out << "  Total Cases:  ,'" << srCount.size() << ",  Total Calls:  ,'" << lineCount - 1 << "\n";
 		}
+
+		std::ofstream out(m_csvName, std::ofstream::app);
+		out << "  Total Cases:  ,'" << srCount.size() << ",  Total Calls:  ,'" << lineCount - 1 << "\n";
 	}
+
 }
 
 std::string StringParser::ParseRawToCSV(std::string str)
@@ -286,7 +294,7 @@ std::string StringParser::ParseRawToCSV(std::string str)
 std::string StringParser::CraftFullCSVRow(std::string inSR, std::string inNotes)
 {
 	std::string row;
-	row = m_timer.GetDate();
+	row = m_Timer.GetDate();
 	row.push_back(',');
 	
 	//Erase inSR non-numbers

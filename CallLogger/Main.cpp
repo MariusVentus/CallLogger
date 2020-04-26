@@ -2,13 +2,15 @@
 #include <locale>
 #include <codecvt>
 #include "SettingsHandler.h"
+#include "TimeClock.h"
 #include "StringParser.h"
 
 
 const char g_szClassName[] = "CallLoggerMainWindow";
 const char g_MainWindowTitle[] = "Call Logger v0.0.8";
-SettingsHandler g_settings;
-StringParser g_crafter(g_settings);
+SettingsHandler g_Settings;
+TimeClock g_Timeclock;
+StringParser g_Crafter(g_Settings, g_Timeclock);
 
 #define ID_FILE_EXIT 9001
 #define ID_HELP 9002
@@ -20,9 +22,10 @@ StringParser g_crafter(g_settings);
 #define ID_OPENLOG 9008
 #define ID_CLEARLOG 9009
 #define ID_STAMPLOG 9010
+#define ID_SHIFTDATE 9011
 #define IDC_MAIN_EDIT 101
 
-HWND hMainWindow, hID, hNote, hLastLine;
+HWND hMainWindow, hDate, hCSVDisplay, hID, hNote, hLastLine;
 void RegisterSettingsWindow(HINSTANCE hInst);
 void OpenSettingsWindow(HWND hWnd);
 LRESULT CALLBACK SetWinProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp);
@@ -56,32 +59,44 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		AppendMenu(hMenu, MF_STRING, ID_HELP, "Help");
 
 		SetMenu(hwnd, hMenu);
+		
+		//Current CSV
+		CreateWindowEx(WS_EX_CLIENTEDGE, "STATIC", "CSV:", WS_CHILD | WS_VISIBLE, 
+			15, 110, 50, 25, hwnd, NULL, GetModuleHandle(NULL), NULL);
+		hCSVDisplay = CreateWindowEx(WS_EX_CLIENTEDGE, "Static", g_Crafter.GetCSVNameNoPath().c_str(), WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL,
+			65, 110, 400, 25, hwnd, NULL, GetModuleHandle(NULL), NULL);
+		//Date
+		CreateWindowEx(WS_EX_CLIENTEDGE, "STATIC", "Date:", WS_CHILD | WS_VISIBLE, 
+			15, 160, 50, 25, hwnd, NULL, GetModuleHandle(NULL), NULL);
+		hDate = CreateWindowEx(WS_EX_CLIENTEDGE, "Static", g_Timeclock.GetDate().c_str(), WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL,
+			65, 160, 350, 25, hwnd, NULL, GetModuleHandle(NULL), NULL);
+		CreateWindowEx(WS_EX_CLIENTEDGE, "Button", "Shift", WS_CHILD | WS_VISIBLE,
+			415, 160, 50, 25, hwnd, (HMENU)ID_SHIFTDATE, GetModuleHandle(NULL), NULL);
 		//SR
-		CreateWindowEx(WS_EX_CLIENTEDGE, "STATIC", "SR",
+		CreateWindowEx(WS_EX_CLIENTEDGE, "STATIC", "SR:",
 			WS_CHILD | WS_VISIBLE,
-			15, 10, 450, 25, hwnd, NULL, GetModuleHandle(NULL), NULL);
-		hID = CreateWindowEx(WS_EX_CLIENTEDGE, "EDIT", "SR#123456789",
-			WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_MULTILINE | ES_AUTOVSCROLL,
-			15, 35, 450, 25, hwnd, (HMENU)IDC_MAIN_EDIT, GetModuleHandle(NULL), NULL);
+			15, 210, 50, 25, hwnd, NULL, GetModuleHandle(NULL), NULL);
+		hID = CreateWindowEx(WS_EX_CLIENTEDGE, "EDIT", "SR#123456789", WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL,
+			65, 210, 400, 25, hwnd, (HMENU)IDC_MAIN_EDIT, GetModuleHandle(NULL), NULL);
 		//Notes
 		CreateWindowEx(WS_EX_CLIENTEDGE, "STATIC", "Raw Notes (Per Call):",
 			WS_CHILD | WS_VISIBLE,
-			15, 60, 450, 25, hwnd, NULL, GetModuleHandle(NULL), NULL);
+			15, 260, 450, 25, hwnd, NULL, GetModuleHandle(NULL), NULL);
 		hNote = CreateWindowEx(WS_EX_CLIENTEDGE, "EDIT", "@X Time called Y Number",
 			WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_MULTILINE | ES_AUTOVSCROLL,
-			15, 85, 450, 200, hwnd, (HMENU)IDC_MAIN_EDIT, GetModuleHandle(NULL), NULL);
+			15, 285, 450, 200, hwnd, (HMENU)IDC_MAIN_EDIT, GetModuleHandle(NULL), NULL);
 		//Last Added Line
 		CreateWindowEx(WS_EX_CLIENTEDGE, "STATIC", "Last Added Line:",
 			WS_CHILD | WS_VISIBLE,
-			15, 285, 450, 25, hwnd, NULL, GetModuleHandle(NULL), NULL);
+			15, 485, 450, 25, hwnd, NULL, GetModuleHandle(NULL), NULL);
 		hLastLine = CreateWindowEx(WS_EX_CLIENTEDGE, "EDIT", "Date, SR, Time, Phone Number",
 			WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL,
-			15, 310, 450, 25, hwnd, (HMENU)IDC_MAIN_EDIT, GetModuleHandle(NULL), NULL);
+			15, 510, 450, 25, hwnd, (HMENU)IDC_MAIN_EDIT, GetModuleHandle(NULL), NULL);
 		//Buttons
 		CreateWindowEx(WS_EX_CLIENTEDGE, "Button", "Parse n Add", WS_CHILD | WS_VISIBLE,
-			25, 350, 200, 50, hwnd, (HMENU)ID_PARSE, GetModuleHandle(NULL), NULL);
+			25, 550, 200, 50, hwnd, (HMENU)ID_PARSE, GetModuleHandle(NULL), NULL);
 		CreateWindowEx(WS_EX_CLIENTEDGE, "Button", "Remove CSV Last Line", WS_CHILD | WS_VISIBLE,
-			250, 350, 200, 50, hwnd, (HMENU)ID_UNDO, GetModuleHandle(NULL), NULL);
+			250, 550, 200, 50, hwnd, (HMENU)ID_UNDO, GetModuleHandle(NULL), NULL);
 
 	case WM_LBUTTONDOWN:
 	{
@@ -97,16 +112,17 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		switch (wParam)
 		{
 		case ID_OPENLOG:
-			ShellExecute(hwnd, "open", g_crafter.GetCSVName().c_str(), NULL, NULL, SW_SHOW);
+			g_Crafter.CheckCSV();
+			ShellExecute(hwnd, "open", g_Crafter.GetCSVName().c_str(), NULL, NULL, SW_SHOW);
 			break;
 		case ID_CLEARLOG:
 			if (MessageBox(hwnd, "Are you sure you want to clear the current log?\nThis will erase EVERYTHING.", "Clear Log?", MB_OKCANCEL | MB_ICONERROR) == IDOK) {
-				g_crafter.ClearCurrentLog();
+				g_Crafter.ClearCurrentLog();
 			}
 			break;
 		case ID_STAMPLOG:
 			if (MessageBox(hwnd, "Are you sure you want to stamp the current log?\nThis is normally done right before submission.", "Stamp Log?", MB_OKCANCEL | MB_ICONEXCLAMATION) == IDOK) {
-				g_crafter.StampCurrentLog();
+				g_Crafter.StampCurrentLog();
 			}
 			break;
 		case ID_TRAIN_AI:
@@ -125,7 +141,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			MessageBox(hwnd, "There is no help, only Zuul. \nOr ping me on Teams. ;) \n\nOr the Readme on Github: https://github.com/MariusVentus/CallLogger/blob/master/README.md", "Halp", MB_OK | MB_ICONINFORMATION);
 			break;
 		case ID_UNDO:
-			g_crafter.RemoveLastLine();
+			g_Crafter.RemoveLastLine();
 			break;
 		case ID_PARSE:
 			char srNum[100] = "";
@@ -136,7 +152,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			GetWindowText(hNote, rawNote, 1000);
 			stringSR = srNum;
 			stringNote = rawNote;
-			SetWindowText(hLastLine, g_crafter.OutputToCSV(stringSR, stringNote).c_str());
+			SetWindowText(hLastLine, g_Crafter.OutputToCSV(stringSR, stringNote).c_str());
 			break;
 		}
 		break;
@@ -186,7 +202,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 		g_szClassName,
 		g_MainWindowTitle,
 		WS_OVERLAPPEDWINDOW,
-		CW_USEDEFAULT, CW_USEDEFAULT, 500, 500,
+		CW_USEDEFAULT, CW_USEDEFAULT, 500, 700,
 		NULL, NULL, hInstance, NULL);
 
 	if (hMainWindow == NULL)
@@ -238,7 +254,7 @@ void OpenSettingsWindow(HWND hWnd) {
 	CreateWindowEx(NULL, "STATIC", "Weekly Auto-Splitting", WS_CHILD | WS_VISIBLE, 20, 10, 200, 25, hSetWindow, NULL, GetModuleHandle(NULL), NULL);
 	CreateWindowEx(NULL, "button", "Enabled", WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX, 20, 35, 80, 40, hSetWindow, (HMENU)10, NULL, NULL);
 
-	if (g_settings.GetAutoSplit()) {
+	if (g_Settings.GetAutoSplit()) {
 		CheckDlgButton(hSetWindow, 10, BST_CHECKED);
 	}
 
@@ -252,7 +268,7 @@ void OpenSettingsWindow(HWND hWnd) {
 	CreateWindowEx(NULL, "button", "Sat", WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX, 30, 245, 80, 40, hSetWindow, (HMENU)9, NULL, NULL);
 
 	for (unsigned i = 0; i < 7; i++) {
-		if (g_settings.GetWorkday(i)) {
+		if (g_Settings.GetWorkday(i)) {
 			CheckDlgButton(hSetWindow, i + 3, BST_CHECKED);
 		}
 	}
@@ -271,39 +287,40 @@ LRESULT CALLBACK SetWinProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
 		switch (wp)
 		{
 		case IDOK:
-			g_settings.SaveSettingsToFile();
-			g_crafter.SetCSVfromDate();
+			g_Settings.SaveSettingsToFile();
+			g_Crafter.SetCSVfromDate();
+			SetWindowText(hCSVDisplay, g_Crafter.GetCSVNameNoPath().c_str());
 			EnableWindow(hMainWindow, true);
 			DestroyWindow(hWnd);
 			break;
 		case IDCANCEL:
-			g_settings.ResetSettings();
+			g_Settings.ResetSettings();
 			EnableWindow(hMainWindow, true);
 			DestroyWindow(hWnd);
 			break;
 		case 10:
-			g_settings.SetAutoSplit(!g_settings.GetAutoSplit()); 
+			g_Settings.SetAutoSplit(!g_Settings.GetAutoSplit()); 
 			break;
 		case 3:
-			g_settings.SetWorkday(0, !g_settings.GetWorkday(0)); //Sun
+			g_Settings.SetWorkday(0, !g_Settings.GetWorkday(0)); //Sun
 			break;
 		case 4:
-			g_settings.SetWorkday(1, !g_settings.GetWorkday(1)); //Mon
+			g_Settings.SetWorkday(1, !g_Settings.GetWorkday(1)); //Mon
 			break;
 		case 5:
-			g_settings.SetWorkday(2, !g_settings.GetWorkday(2)); //Tue
+			g_Settings.SetWorkday(2, !g_Settings.GetWorkday(2)); //Tue
 			break;
 		case 6:
-			g_settings.SetWorkday(3, !g_settings.GetWorkday(3)); // Wed
+			g_Settings.SetWorkday(3, !g_Settings.GetWorkday(3)); // Wed
 			break;
 		case 7:
-			g_settings.SetWorkday(4, !g_settings.GetWorkday(4)); //Thur
+			g_Settings.SetWorkday(4, !g_Settings.GetWorkday(4)); //Thur
 			break;
 		case 8:
-			g_settings.SetWorkday(5, !g_settings.GetWorkday(5)); //Fri
+			g_Settings.SetWorkday(5, !g_Settings.GetWorkday(5)); //Fri
 			break;
 		case 9:
-			g_settings.SetWorkday(6, !g_settings.GetWorkday(6)); //Sat
+			g_Settings.SetWorkday(6, !g_Settings.GetWorkday(6)); //Sat
 			break;
 		default:
 			break;

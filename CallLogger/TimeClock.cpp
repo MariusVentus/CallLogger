@@ -159,8 +159,34 @@ std::string TimeClock::GetYear(void) const
 	return str;
 }
 
-void TimeClock::TestAll(void) const
+std::string TimeClock::GetTime(void) const
 {
+	std::string temp = m_time;
+	temp.erase(0, temp.find(":") - 2);
+	temp.erase(temp.find_last_of(":") + 3);
+	return temp;
+}
+
+void TimeClock::SetTimeShiftedX(int xDaysShifted)
+{
+	std::string temp = WeekDayShiftX(xDaysShifted);
+	std::string tempTime = GetTime();
+	temp.append(" ");
+	temp.append(GetDateShiftX(xDaysShifted));
+	while (temp.find("-") != std::string::npos) {
+		temp.replace(temp.find("-"), 1, " ");
+	}
+	m_time = temp;
+	temp.clear();
+	temp.append(" ");
+	temp.append(tempTime);
+	temp.append(" ");
+	m_time.replace(m_time.find_last_of(" "), 1, temp);
+}
+
+void TimeClock::TestAll(void)
+{
+	//Getters
 	auto str = GetFullTime();
 	str = GetDate();
 	str = GetDateNDay();
@@ -168,6 +194,8 @@ void TimeClock::TestAll(void) const
 	str = GetDayNum();
 	str = GetMonth();
 	str = GetYear();
+	str = GetTime();
+	//Shift Checks
 	str = GetDateShiftX(0);
 	str = GetDateShiftX(1);
 	str = GetDateShiftX(69);
@@ -176,7 +204,23 @@ void TimeClock::TestAll(void) const
 	str = GetDateShiftX(-6);
 	str = GetDateShiftX(-69);
 	str = GetDateShiftX(-369);
-
+	str = WeekDayShiftX(20);
+	str = WeekDayShiftX(10);
+	str = WeekDayShiftX(1);
+	str = WeekDayShiftX(0);
+	str = WeekDayShiftX(-1);
+	str = WeekDayShiftX(-10);
+	str = WeekDayShiftX(-20);
+	//Check Date Change
+	SetTimeShiftedX(1);
+	str = GetFullTime();
+	str = GetDate();
+	str = GetDateNDay();
+	str = GetDay();
+	str = GetDayNum();
+	str = GetMonth();
+	str = GetYear();
+	//Converters
 	unsigned num = DayofWeektoInt();
 	num = DaytoInt();
 	num = MonthtoInt();
@@ -220,9 +264,52 @@ unsigned TimeClock::DayofWeektoInt(void) const
 	else if (GetDay() == "Fri") { return 5; }
 	else if (GetDay() == "Sat") { return 6; }
 	else {
-		return 0;
+		return -1;
 	}
 
+}
+
+std::string TimeClock::WeekDayShiftX(int x) const
+{
+	int dayN = (int)DayofWeektoInt();
+	//Positive
+	if (x >= 0) {
+		if (x > 6 - dayN) {
+			x = x - (7 - dayN);
+			while (x > 6) {
+				x = x - 7;
+			}
+			dayN = x;
+		}
+		else {
+			dayN += x;
+		}
+	}
+	//Negative
+	else {
+		x = -x;
+		if (x > dayN) {
+			x = x - (dayN + 1);
+			while (x > 6) {
+				x = x - 7;
+			}
+			dayN = 6 - x;
+		}
+		else {
+			dayN = dayN - x;
+		}
+	}
+
+	if (dayN == 0) { return "Sun"; }
+	else if (dayN == 1) { return "Mon"; }
+	else if (dayN == 2) { return "Tue"; }
+	else if (dayN == 3) { return "Wed"; }
+	else if (dayN == 4) { return "Thu"; }
+	else if (dayN == 5) { return "Fri"; }
+	else if (dayN == 6) { return "Sat"; }
+	else {
+		return "";
+	}
 }
 
 unsigned TimeClock::DaytoInt(void) const
@@ -245,7 +332,7 @@ unsigned TimeClock::MonthtoInt(void) const
 	else if (month == "Oct") { return 9; }
 	else if (month == "Nov") { return 10; }
 	else if (month == "Dec") { return 11; }
-	else { return 0; }
+	else { return -1; }
 
 }
 

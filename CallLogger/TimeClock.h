@@ -13,10 +13,13 @@ public:
 	std::string GetDayNum(void) const;
 	std::string GetMonth(void) const;
 	std::string GetYear(void) const;
+	std::string GetTime(void) const;
 	void SetTime(const std::string& inTime) { m_time = inTime; }
-	void TestAll(void) const;
+	void SetTimeShiftedX(int xDaysShifted);
+	void TestAll(void);
 
 	unsigned DayofWeektoInt(void) const;
+	std::string WeekDayShiftX(int x) const;
 private:
 	std::string m_time;
 	unsigned DaysinMonth(unsigned month, unsigned year) const; //Months from 0!

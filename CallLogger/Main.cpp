@@ -7,7 +7,7 @@
 
 
 const char g_szClassName[] = "CallLoggerMainWindow";
-const char g_MainWindowTitle[] = "Call Logger v0.0.8";
+const char g_MainWindowTitle[] = "Call Logger v0.0.9";
 SettingsHandler g_Settings;
 TimeClock g_Timeclock;
 StringParser g_Crafter(g_Settings, g_Timeclock);
@@ -22,7 +22,9 @@ StringParser g_Crafter(g_Settings, g_Timeclock);
 #define ID_OPENLOG 9008
 #define ID_CLEARLOG 9009
 #define ID_STAMPLOG 9010
-#define ID_SHIFTDATE 9011
+#define ID_SHIFTDATEF 9011
+#define ID_SHIFTDATEB 9012
+#define ID_RESETDATE 9013
 #define IDC_MAIN_EDIT 101
 
 HWND hMainWindow, hDate, hCSVDisplay, hID, hNote, hLastLine;
@@ -69,9 +71,13 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		CreateWindowEx(WS_EX_CLIENTEDGE, "STATIC", "Date:", WS_CHILD | WS_VISIBLE, 
 			15, 160, 50, 25, hwnd, NULL, GetModuleHandle(NULL), NULL);
 		hDate = CreateWindowEx(WS_EX_CLIENTEDGE, "Static", g_Timeclock.GetDate().c_str(), WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL,
-			65, 160, 350, 25, hwnd, NULL, GetModuleHandle(NULL), NULL);
-		CreateWindowEx(WS_EX_CLIENTEDGE, "Button", "Shift", WS_CHILD | WS_VISIBLE,
-			415, 160, 50, 25, hwnd, (HMENU)ID_SHIFTDATE, GetModuleHandle(NULL), NULL);
+			65, 160, 250, 25, hwnd, NULL, GetModuleHandle(NULL), NULL);
+		CreateWindowEx(WS_EX_CLIENTEDGE, "Button", "<Shift", WS_CHILD | WS_VISIBLE,
+			315, 160, 50, 25, hwnd, (HMENU)ID_SHIFTDATEB, GetModuleHandle(NULL), NULL);
+		CreateWindowEx(WS_EX_CLIENTEDGE, "Button", "Shift>", WS_CHILD | WS_VISIBLE,
+			365, 160, 50, 25, hwnd, (HMENU)ID_SHIFTDATEF, GetModuleHandle(NULL), NULL);
+		CreateWindowEx(WS_EX_CLIENTEDGE, "Button", "Reset", WS_CHILD | WS_VISIBLE,
+			415, 160, 50, 25, hwnd, (HMENU)ID_RESETDATE, GetModuleHandle(NULL), NULL);
 		//SR
 		CreateWindowEx(WS_EX_CLIENTEDGE, "STATIC", "SR:",
 			WS_CHILD | WS_VISIBLE,
@@ -97,17 +103,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			25, 550, 200, 50, hwnd, (HMENU)ID_PARSE, GetModuleHandle(NULL), NULL);
 		CreateWindowEx(WS_EX_CLIENTEDGE, "Button", "Remove CSV Last Line", WS_CHILD | WS_VISIBLE,
 			250, 550, 200, 50, hwnd, (HMENU)ID_UNDO, GetModuleHandle(NULL), NULL);
-
-	case WM_LBUTTONDOWN:
-	{
-		//MessageBeep(MB_OK);
-		/*char szFileName[MAX_PATH];
-		HINSTANCE hInstance = GetModuleHandle(NULL);
-
-		GetModuleFileName(hInstance, szFileName, MAX_PATH);
-		MessageBox(hwnd, szFileName, "This program is:", MB_OK | MB_ICONINFORMATION);*/
-	}
-	break;
+		break;
+//COMMANDS
 	case WM_COMMAND:
 		switch (wParam)
 		{
@@ -135,13 +132,31 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			OpenSettingsWindow(hwnd);
 			break;
 		case ID_ABOUT:
-			MessageBox(hwnd, "This was originally made in an hour while eating breakfast. \nOver time, it has ballooned into a project made over many hours, breakfasts, some lunches, a few dinners, and even squeezed into a few breaks.\n\nIt's far from perfect, but I am happy with the progress, and it's certainly helped me learn the Windows API.\nI hope it helps!\n....\n\nThat is all.", "About", MB_OK | MB_ICONINFORMATION);
+			MessageBox(hwnd, "This was originally made in an hour while eating breakfast. \nOver time, it has ballooned into a project made over many hours, breakfasts, some lunches, a few dinners, and even squeezed into a few breaks.\n\nIt's far from perfect, but I am happy with the progress, and it's certainly helped me learn the Windows API.\nI hope it helps!\n\n-Marius Ventus", "About", MB_OK | MB_ICONINFORMATION);
 			break;
 		case ID_HELP:
 			MessageBox(hwnd, "There is no help, only Zuul. \nOr ping me on Teams. ;) \n\nOr the Readme on Github: https://github.com/MariusVentus/CallLogger/blob/master/README.md", "Halp", MB_OK | MB_ICONINFORMATION);
 			break;
 		case ID_UNDO:
 			g_Crafter.RemoveLastLine();
+			break;
+		case ID_SHIFTDATEB:
+			g_Timeclock.SetTimeShiftedX(-1);
+			g_Crafter.SetCSVfromDate();
+			SetWindowText(hDate, g_Timeclock.GetDate().c_str());
+			SetWindowText(hCSVDisplay, g_Crafter.GetCSVNameNoPath().c_str());
+			break;
+		case ID_SHIFTDATEF:
+			g_Timeclock.SetTimeShiftedX(1);
+			g_Crafter.SetCSVfromDate();
+			SetWindowText(hDate, g_Timeclock.GetDate().c_str());
+			SetWindowText(hCSVDisplay, g_Crafter.GetCSVNameNoPath().c_str());
+			break;
+		case ID_RESETDATE:
+			g_Timeclock.RefreshTime();
+			g_Crafter.SetCSVfromDate();
+			SetWindowText(hDate, g_Timeclock.GetDate().c_str());
+			SetWindowText(hCSVDisplay, g_Crafter.GetCSVNameNoPath().c_str());
 			break;
 		case ID_PARSE:
 			char srNum[100] = "";

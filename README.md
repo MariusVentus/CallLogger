@@ -16,20 +16,22 @@ Removed the "Open CSV" Button (as system restrictions at work break it) and repl
 
 V0.0.2 > Added a "Show Last Line" box since I keep forgetting where I am. 
 
-V0.0.3 > Added (Working) "Open Current Log" Button. Added (Not Working) "Clear Current Log" and "Stamp Current Log" buttons, split About and Help into two buttons, added Settings menu to save weekdays.
+V0.0.3 > Added (Working) "Open Current Log" Button. Added (Not Working) "Clear Current Log" and "Stamp Current Log" buttons, split About and Help into two buttons, added Settings menu to eventually save weekdays.
 
-V0.0.4-6 > Added Icons and Resources, clearing and stamping logs. 
+V0.0.4-6 > Added Icons and Resources, "Clear Current Log" and "Stamp Current Log" buttons working. 
 
 V0.0.7 > Completed settings menu, now able to save and update settings. 
 
 V0.0.8 > Auto-splits call logs each week, altering the CSV to match the normal Workdays in the settings.
 
+V0.0.9 > Date box shos current date, with Shift/Reset buttons to alter adding date. Will also change Csvs as needed, if auto-splitting enabled.
+
 ***Planned Features (Warning: Doing this for fun in my free time. Updates will be slow, if at all)***
 
-1.) Date box showing the current date, with override options to add calls from previous days.
+1.) Improved layout and "graphics." Improved code (right now it is spaghetti all shoved in main.cpp)
 
-2.) Improved layout and "graphics." Improved code (right now it is spaghetti all shoved in main.cpp)
-
-3.) Possible AI "Learn your note-taking style" feature which learns how to parse based off the user. 
+2.) Possible AI "Learn your note-taking style" feature which learns how to parse based off the user. 
 Might be too ambitious, given the average user's hardware.
+
+3.) Miscellaneous Improvements. Maybe a sorting feature to sort csvs by date, although Excel can already do that. Suggestions?
 

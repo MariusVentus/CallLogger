@@ -7,8 +7,8 @@
 
 const char g_szClassName[] = "CallLoggerMainWindow";
 const char g_MainWindowTitle[] = "Call Logger v0.0.8";
-StringParser g_crafter;
 SettingsHandler g_settings;
+StringParser g_crafter(g_settings);
 
 #define ID_FILE_EXIT 9001
 #define ID_HELP 9002
@@ -119,7 +119,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			OpenSettingsWindow(hwnd);
 			break;
 		case ID_ABOUT:
-			MessageBox(hwnd, "This was originally made in an hour while eating breakfast. \nOver time, it has ballooned into a project made over many hours, breakfasts, some lunches, a few dinners, and even squeezed into a few breaks.\n\nIt's far from perfect, but I am happy with the progress, and I hope it helps!\n....\n\nThat is all.", "About", MB_OK | MB_ICONINFORMATION);
+			MessageBox(hwnd, "This was originally made in an hour while eating breakfast. \nOver time, it has ballooned into a project made over many hours, breakfasts, some lunches, a few dinners, and even squeezed into a few breaks.\n\nIt's far from perfect, but I am happy with the progress, and it's certainly helped me learn the Windows API.\nI hope it helps!\n....\n\nThat is all.", "About", MB_OK | MB_ICONINFORMATION);
 			break;
 		case ID_HELP:
 			MessageBox(hwnd, "There is no help, only Zuul. \nOr ping me on Teams. ;) \n\nOr the Readme on Github: https://github.com/MariusVentus/CallLogger/blob/master/README.md", "Halp", MB_OK | MB_ICONINFORMATION);
@@ -272,6 +272,7 @@ LRESULT CALLBACK SetWinProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
 		{
 		case IDOK:
 			g_settings.SaveSettingsToFile();
+			g_crafter.SetCSVfromDate();
 			EnableWindow(hMainWindow, true);
 			DestroyWindow(hWnd);
 			break;

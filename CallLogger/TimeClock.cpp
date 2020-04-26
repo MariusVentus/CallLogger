@@ -4,12 +4,13 @@
 TimeClock::TimeClock(void)
 {
 	RefreshTime();
+//	TestAll();
 }
 
 void TimeClock::RefreshTime(void)
 {
 	time_t result = time(NULL);
-	char cstr[26];
+	char cstr[26] = "";
 	ctime_s(cstr, sizeof cstr, &result);
 	m_time = cstr;
 	//Remove Double Whitespace
@@ -50,6 +51,58 @@ std::string TimeClock::GetDate(void) const
 	return str;
 }
 
+std::string TimeClock::GetDateShiftX(int x) const
+{
+	if (x != 0) {
+		int day = (int)DaytoInt();
+		int month = (int)MonthtoInt();
+		int year = (int)YeartoInt();
+		//Positive
+		if (x > 0) {
+			if (x > (int)DaysinMonth(month, year) - day) {
+				x = x - (DaysinMonth(month, year) - day);
+				if (month != 11) { month++; }
+				else { month = 0; year++; }
+				while (x > (int)DaysinMonth(month, year)) {
+					x = x - DaysinMonth(month, year);
+					if (month != 11) { month++; }
+					else { month = 0; year++; }
+				}
+				day = x;
+				return NumDatetoString(day, month, year);
+			}
+			else {
+				day += x;
+				return NumDatetoString(day, month, year);
+			}
+		}
+		//Negative
+		else {
+			x = -x;
+			if (x >= day) {
+				x = x - day;
+				if (month != 0) { month--; }
+				else { month = 11; year--; }
+				while (x >= (int)DaysinMonth(month, year)) {
+					x = x - DaysinMonth(month, year);
+					if (month != 0) { month--; }
+					else { month = 11; year--; }
+				}
+				day = DaysinMonth(month, year) - x;
+				return NumDatetoString(day, month, year);
+			}
+			else {
+				day = day - x;
+				return NumDatetoString(day, month, year);
+			}
+		}
+
+	}
+	else {
+		return GetDate();
+	}
+}
+
 std::string TimeClock::GetDateNDay(void) const
 {
 	auto str = m_time;
@@ -75,3 +128,151 @@ std::string TimeClock::GetDay(void) const
 	return str;
 }
 
+std::string TimeClock::GetDayNum(void) const
+{
+	auto str = m_time;
+	//Remove Day
+	str.erase(0, str.find(" ") + 1);
+	//Remove Month
+	str.erase(0, str.find(" ") + 1);
+	//Remove Everything after Day Number
+	str.erase(str.find(" "));
+
+	return str;
+}
+
+std::string TimeClock::GetMonth(void) const
+{
+	auto str = m_time;
+	//Remove Day
+	str.erase(0, str.find(" ") + 1);
+	//Then everything after Month
+	str.erase(str.find(" "));
+	return str;
+}
+
+std::string TimeClock::GetYear(void) const
+{
+	//Erase all but Year
+	auto str = m_time;
+	str.erase(0, str.find_last_of(" ")+1);
+	return str;
+}
+
+void TimeClock::TestAll(void) const
+{
+	auto str = GetFullTime();
+	str = GetDate();
+	str = GetDateNDay();
+	str = GetDay();
+	str = GetDayNum();
+	str = GetMonth();
+	str = GetYear();
+	str = GetDateShiftX(0);
+	str = GetDateShiftX(1);
+	str = GetDateShiftX(69);
+	str = GetDateShiftX(369); 
+	str = GetDateShiftX(-1);
+	str = GetDateShiftX(-6);
+	str = GetDateShiftX(-69);
+	str = GetDateShiftX(-369);
+
+	unsigned num = DayofWeektoInt();
+	num = DaytoInt();
+	num = MonthtoInt();
+	num = YeartoInt();
+	num = DaysinMonth(0, 2020);
+	num = DaysinMonth(3, 2020);
+	num = DaysinMonth(1, 2000);
+	num = DaysinMonth(1, 1900);
+	num = DaysinMonth(1, 2020);
+
+}
+
+unsigned TimeClock::DaysinMonth(unsigned month, unsigned year) const
+{
+	if (month == 3 || month == 5 || month == 8 || month == 10) { 
+		return 30; 
+	}
+	else if (month == 1)
+	{
+		bool leapyear = (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
+		if (leapyear){
+			return 29;
+		}
+		else {
+			return 28;
+		}
+	}
+	else { 
+		return 31; 
+	}
+
+}
+
+unsigned TimeClock::DayofWeektoInt(void) const
+{
+	if (GetDay() == "Sun") { return 0; }
+	else if (GetDay() == "Mon") { return 1; }
+	else if (GetDay() == "Tue") { return 2; }
+	else if (GetDay() == "Wed") { return 3; }
+	else if (GetDay() == "Thu") { return 4; }
+	else if (GetDay() == "Fri") { return 5; }
+	else if (GetDay() == "Sat") { return 6; }
+	else {
+		return 0;
+	}
+
+}
+
+unsigned TimeClock::DaytoInt(void) const
+{
+	return std::stoul(GetDayNum());
+}
+
+unsigned TimeClock::MonthtoInt(void) const
+{
+	auto month = GetMonth();
+	if (month == "Jan") { return 0; }
+	else if (month == "Feb") { return 1; }
+	else if (month == "Mar") { return 2; }
+	else if (month == "Apr") { return 3; }
+	else if (month == "May") { return 4; }
+	else if (month == "Jun") { return 5; }
+	else if (month == "Jul") { return 6; }
+	else if (month == "Aug") { return 7; }
+	else if (month == "Sep") { return 8; }
+	else if (month == "Oct") { return 9; }
+	else if (month == "Nov") { return 10; }
+	else if (month == "Dec") { return 11; }
+	else { return 0; }
+
+}
+
+unsigned TimeClock::YeartoInt(void) const
+{
+	return std::stoul(GetYear());
+}
+
+std::string TimeClock::NumDatetoString(unsigned day, unsigned month, unsigned year) const
+{
+	std::string date = "";
+	if (month == 0) { date = "Jan"; }
+	else if (month == 1) { date = "Feb"; }
+	else if (month == 2) { date = "Mar"; }
+	else if (month == 3) { date = "Apr"; }
+	else if (month == 4) { date = "May"; }
+	else if (month == 5) { date = "Jun"; }
+	else if (month == 6) { date = "Jul"; }
+	else if (month == 7) { date = "Aug"; }
+	else if (month == 8) { date = "Sep"; }
+	else if (month == 9) { date = "Oct"; }
+	else if (month == 10) { date = "Nov"; }
+	else if (month == 11) { date = "Dec"; }
+
+	date.append("-");
+	date.append(std::to_string(day));
+	date.append("-");
+	date.append(std::to_string(year));
+	return date;
+}

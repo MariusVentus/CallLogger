@@ -2,16 +2,23 @@
 #include <fstream>
 #include <vector>
 
+StringParser::StringParser(const SettingsHandler& inSet)
+	:
+	m_Settings(inSet)
+{
+	SetCSVfromDate();
+}
+
 std::string StringParser::OutputToCSV(std::string inSR, std::string inNotes)
 {
 
-	std::ifstream in(csvName);
+	std::ifstream in(m_csvName);
 	if (!in) {
-		std::ofstream tempOut(csvName, std::ofstream::app);
+		std::ofstream tempOut(m_csvName, std::ofstream::app);
 		tempOut << "  Date  ,  SR#  ,  Time  ,  Phone#  \n";
 	}
 
-	std::ofstream out(csvName, std::ofstream::app);
+	std::ofstream out(m_csvName, std::ofstream::app);
 	out << CraftFullCSVRow(inSR, inNotes) << "\n";
 
 	return CraftFullCSVRow(inSR, inNotes);
@@ -19,15 +26,15 @@ std::string StringParser::OutputToCSV(std::string inSR, std::string inNotes)
 
 void StringParser::ClearCurrentLog(void)
 {
-	std::ofstream out(csvName, std::ofstream::trunc);
+	std::ofstream out(m_csvName, std::ofstream::trunc);
 	out << "  Date  ,  SR#  ,  Time  ,  Phone#  \n";
 }
 
 void StringParser::RemoveLastLine(void)
 {
-	std::ifstream in(csvName);
+	std::ifstream in(m_csvName);
 	if (in) {
-		std::ifstream count(csvName);
+		std::ifstream count(m_csvName);
 		std::string temp;
 		std::string fileInfo;
 		unsigned lineCount = 0;
@@ -49,16 +56,50 @@ void StringParser::RemoveLastLine(void)
 			fileInfo.append("\n");
 		}
 
-		std::ofstream out(csvName, std::ofstream::trunc);
+		std::ofstream out(m_csvName, std::ofstream::trunc);
 		out << fileInfo;
+	}
+}
+
+void StringParser::SetCSVfromDate(void)
+{
+	m_csvName = m_csvRoot;
+	if (m_Settings.GetAutoSplit()) {
+		int first = (int)m_Settings.GetFirstDayOfWeek();
+		int last = (int)m_Settings.GetLastDayOfWeek();
+		int day = (int)m_timer.DayofWeektoInt();
+		std::string tempDateF;
+		std::string tempDateL;
+		m_csvName.append(" ");
+
+		//Add First Day
+		tempDateF = m_timer.GetDateShiftX(first - day);
+		tempDateF.erase(tempDateF.find_last_of("-"));
+		tempDateF.replace(tempDateF.find("-"), 1, " ");
+		m_csvName.append(tempDateF);
+
+		//Add Last Day
+		tempDateL = m_timer.GetDateShiftX(last - day);
+		tempDateL.erase(tempDateL.find_last_of("-"));
+		tempDateL.replace(tempDateL.find("-"), 1, " ");
+		if (tempDateF != tempDateL) {
+			m_csvName.append(" to ");
+			m_csvName.append(tempDateL);
+		}
+	}
+	m_csvName.append(m_csvFiletype);
+	std::ifstream in(m_csvName);
+	if (!in) {
+		std::ofstream tempOut(m_csvName, std::ofstream::app);
+		tempOut << "  Date  ,  SR#  ,  Time  ,  Phone#  \n";
 	}
 }
 
 void StringParser::StampCurrentLog(void)
 {
-	std::ifstream in(csvName);
+	std::ifstream in(m_csvName);
 	if (in) {
-		std::ifstream count(csvName);
+		std::ifstream count(m_csvName);
 		std::string temp;
 		std::vector<std::string> srCount;
 		unsigned lineCount = 0;
@@ -97,7 +138,7 @@ void StringParser::StampCurrentLog(void)
 				}
 			}
 
-			std::ofstream out(csvName, std::ofstream::app);
+			std::ofstream out(m_csvName, std::ofstream::app);
 			out << "  Total Cases:  ,'" << srCount.size() << ",  Total Calls:  ,'" << lineCount - 1 << "\n";
 		}
 	}

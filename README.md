@@ -20,14 +20,16 @@ V0.0.3 > Added (Working) "Open Current Log" Button. Added (Not Working) "Clear C
 
 V0.0.4-6 > Added Icons and Resources, clearing and stamping logs. 
 
+V0.0.7 > Completed settings menu, now able to save and update settings. 
+
+V0.0.8 > Auto-splits call logs each week, altering the CSV to match the normal Workdays in the settings.
+
 ***Planned Features (Warning: Doing this for fun in my free time. Updates will be slow, if at all)***
 
 1.) Date box showing the current date, with override options to add calls from previous days.
 
-2.) Create Diffent .CSVs for each week, with date in the name. Include override. Possibly including settings to set "workdays."
+2.) Improved layout and "graphics." Improved code (right now it is spaghetti all shoved in main.cpp)
 
-3.) Improved layout and "graphics." Improved code (right now it is spaghetti all shoved in main.cpp)
-
-4.) Possible AI "Learn your note-taking style" feature which learns how to parse based off the user. 
+3.) Possible AI "Learn your note-taking style" feature which learns how to parse based off the user. 
 Might be too ambitious, given the average user's hardware.
 

@@ -16,9 +16,10 @@ std::string StringParser::OutputToCSV(std::string inSR, std::string inNotes)
 	CheckCSV();
 
 	std::ofstream out(m_csvName, std::ofstream::app);
-	out << CraftFullCSVRow(inSR, inNotes) << "\n";
+	std::string temp = CraftFullCSVRow(inSR, inNotes);
+	out << temp << "\n";
 
-	return CraftFullCSVRow(inSR, inNotes);
+	return temp;
 }
 
 std::string StringParser::GetCSVNameNoPath(void) const
@@ -206,6 +207,11 @@ std::string StringParser::ParseRawToCSV(std::string str)
 		str.erase(str.find(":"), 1);
 	}
 
+	//Add Trailiing Whitespace so Time Check still goes through full line
+	if (str.find_last_of(" ") != str.size() || str.find(" ") == std::string::npos) {
+		str.append(" ");
+	}
+
 	//Fill Token with Time
 	while (str.find(" ") != std::string::npos) {
 		if (str.find(" ") > 4) {
@@ -223,10 +229,25 @@ std::string StringParser::ParseRawToCSV(std::string str)
 			}
 		}
 	}
+
+	if (token.empty() && str.size() > 0) {
+		token = str;
+		str.clear();
+	}
+
 	//Time
 	if (token.size() > 0) {
 		if (token.size() == 4) {
 			token.insert(2, ":");
+			if (notMilAmPm == 1) {
+				token.insert(5, " AM");
+			}
+			else if (notMilAmPm == 2) {
+				token.insert(5, " PM");
+			}
+		}
+		else if (token.size() <= 2) {
+			token.append(":00");
 			if (notMilAmPm == 1) {
 				token.insert(5, " AM");
 			}
@@ -249,11 +270,13 @@ std::string StringParser::ParseRawToCSV(std::string str)
 	output = token;
 	token.clear();
 
-	//Phone Number
+	//---------------Phone Number---------------
+	//Country Code check
 	unsigned countryCodeNum = 0;
 	if (str.find(" ") <= 3) {
 		countryCodeNum = str.find(" ");
 	}
+	//Remove Whitespace until sufficient numbers for Phone Number found, and fill token if found
 	while (str.find(" ") != std::string::npos) {
 		if (str.find(" ") > 9) {
 			token = str;
@@ -267,22 +290,34 @@ std::string StringParser::ParseRawToCSV(std::string str)
 			str.erase(str.find(" "), 1);
 		}
 	}
-	if (token == "") {
+	//if Token still empty, just put whatever numbers found in it
+	if (token.empty()) {
 		token = str;
 	}
-	if (token.size() != 0) {
-		token.insert(token.size() - 4, "-");
+	//Formatting
+	if (token.size() != 0 && countryCodeNum != token.size()) //Eval left to right, so fail on condition 1 (==0) shouldn't cause issue with condition 2. 
+	{	
+		if (token.size() - countryCodeNum < 5) {
+			countryCodeNum = 0;
+		}
+		//Dash 1
+		if (token.size() - countryCodeNum > 4) {
+			token.insert(token.size() - 4, "-");
+		}
+		//Dash 2
 		if ((token.size() - countryCodeNum) > 8) {
 			token.insert(token.size() - 8, "-");
 		}
+		//Country Code Space
 		if (countryCodeNum != 0) {
 			token.insert(countryCodeNum, " ");
 		}
-		if (countryCodeNum == 3 && (token.size() - countryCodeNum) == 9) {
-			token.replace(token.size() - 9, 1, "-");
+		if (countryCodeNum == 3 && token.size() == 12) {
+			token.replace(3, 1, "-");
 		}
 
-		if (countryCodeNum != 3 || token.size() > 12) {
+		//PLUS for International calling
+		if (token.find(" ") != std::string::npos || token.size() > 12) {
 			token.insert(0, "+");
 		}
 	}

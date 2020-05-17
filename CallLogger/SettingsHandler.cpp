@@ -93,10 +93,18 @@ unsigned SettingsHandler::GetLastDayOfWeek(void) const
 
 bool SettingsHandler::StoB(const std::string& inStr) const
 {
-	if (inStr == "true" || inStr == "True") {
+	auto str = inStr;
+	//Lower all Letters
+	for (unsigned i = 0; i < str.size(); i++) {
+		if (str[i] >= 65 && str[i] <= 90) {
+			str[i] = str[i] + 32; //Make into lowercase
+		}
+	}
+	//Bool
+	if (str == "true") {
 		return true;
 	}
-	else if (inStr == "false" || inStr == "False") {
+	else if (str == "false") {
 		return false;
 	}
 	else {

@@ -237,28 +237,28 @@ std::string StringParser::ParseRawToCSV(std::string str)
 		if (token.size() == 4) {
 			token.insert(2, ":");
 			if (notMilAmPm == 1) {
-				token.insert(5, " AM");
+				token.append(" AM");
 			}
 			else if (notMilAmPm == 2) {
-				token.insert(5, " PM");
+				token.append(" PM");
 			}
 		}
 		else if (token.size() <= 2) {
 			token.append(":00");
 			if (notMilAmPm == 1) {
-				token.insert(5, " AM");
+				token.append(" AM");
 			}
 			else if (notMilAmPm == 2) {
-				token.insert(5, " PM");
+				token.append(" PM");
 			}
 		}
 		else {
 			token.insert(1, ":");
 			if (notMilAmPm == 1) {
-				token.insert(4, " AM");
+				token.append(" AM");
 			}
 			else if (notMilAmPm == 2) {
-				token.insert(4, " PM");
+				token.append(" PM");
 			}
 		}
 	}

@@ -7,7 +7,7 @@
 
 
 const char g_szClassName[] = "CallLoggerMainWindow";
-const char g_MainWindowTitle[] = "Call Logger v0.1.0";
+const char g_MainWindowTitle[] = "Call Logger v0.1.1";
 SettingsHandler g_Settings;
 TimeClock g_Timeclock;
 StringParser g_Crafter(g_Settings, g_Timeclock);
@@ -29,6 +29,8 @@ StringParser g_Crafter(g_Settings, g_Timeclock);
 
 HWND hMainWindow, hLogo, hDate, hCSVDisplay, hID, hNote, hLastLine;
 HBITMAP hLogoImage;
+RECT g_MainWin;
+
 void RegisterSettingsWindow(HINSTANCE hInst);
 void OpenSettingsWindow(HWND hWnd);
 LRESULT CALLBACK SetWinProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp);
@@ -265,7 +267,10 @@ void RegisterSettingsWindow(HINSTANCE hInst) {
 }
 
 void OpenSettingsWindow(HWND hWnd) {
-	HWND hSetWindow = CreateWindowEx(WS_EX_CLIENTEDGE, "mySettingsWindow", "Settings", WS_VISIBLE | WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 300, 400, hWnd, NULL, NULL, NULL);
+
+	GetWindowRect(hMainWindow, &g_MainWin);
+
+	HWND hSetWindow = CreateWindowEx(WS_EX_CLIENTEDGE, "mySettingsWindow", "Settings", WS_VISIBLE | WS_OVERLAPPEDWINDOW, g_MainWin.left, g_MainWin.top, 300, 400, hWnd, NULL, NULL, NULL);
 	
 	if (hSetWindow == NULL)
 	{

@@ -166,10 +166,12 @@ std::string StringParser::ParseRawToCSV(std::string str)
 			str[i] = str[i] + 32; //Make into White Space
 		}
 	}
+	//Add Trailiing Whitespace so AM/PM check and Time Check goes through full line
+	str.append(" ");
 
 	//AM or PM, 
 	while (str.find("am") != std::string::npos) {
-		if (str[str.find("am") + 2] < 97 || str[str.find("am") + 2] > 122) {
+		if (((str[str.find("am") - 1] == 32) || (str[str.find("am") - 1] >= 48 && str[str.find("am") - 1] <= 57)) && str[str.find("am") + 2] == 32) {
 			notMilAmPm = 1;
 			break;
 		}
@@ -178,7 +180,7 @@ std::string StringParser::ParseRawToCSV(std::string str)
 		}
 	}
 	while (str.find("pm") != std::string::npos) {
-		if (str[str.find("pm") + 2] < 97 || str[str.find("pm") + 2] > 122) {
+		if (((str[str.find("pm") - 1] == 32) || (str[str.find("pm") - 1] >= 48 && str[str.find("pm") - 1] <= 57)) && str[str.find("pm") + 2] == 32) {
 			notMilAmPm = 2;
 			break;
 		}
@@ -205,11 +207,6 @@ std::string StringParser::ParseRawToCSV(std::string str)
 	//Remove : Directly
 	while (str.find(":") != std::string::npos) {
 		str.erase(str.find(":"), 1);
-	}
-
-	//Add Trailiing Whitespace so Time Check still goes through full line
-	if (str.find_last_of(" ") != str.size() || str.find(" ") == std::string::npos) {
-		str.append(" ");
 	}
 
 	//Fill Token with Time

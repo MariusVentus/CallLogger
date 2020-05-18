@@ -29,6 +29,8 @@ V0.0.9 > Date box shos current date, with Shift/Reset buttons to alter adding da
 
 V0.1.0 > Alpha! Logo added, slight tweak to the layout and visuals. Ready for use!
 
+V0.1.1 > Update: Made the note parser more robust so it could handle edge cases involving 1-2 digit times with no phone number, or small phone numbers. Improved phone number formatting. AM/PM check far more strict to prevent false positives. Efficiency and Polish updates.
+
 ***Planned Features (Warning: Doing this for fun in my free time. Updates will be slow, if at all)***
 
 1.) Improved code (right now it is spaghetti all shoved in main.cpp)

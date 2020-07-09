@@ -79,26 +79,32 @@ void StringParser::SetCSVfromDate(void)
 {
 	m_csvName = m_csvRoot;
 	if (m_Settings.GetAutoSplit()) {
-		int first = (int)m_Settings.GetFirstDayOfWeek();
-		int last = (int)m_Settings.GetLastDayOfWeek();
-		int day = (int)m_Timer.DayofWeektoInt();
-		std::string tempDateF;
-		std::string tempDateL;
-		m_csvName.append(" ");
+		if (!m_Settings.GetMonthSplit()) {
+			int first = (int)m_Settings.GetFirstDayOfWeek();
+			int last = (int)m_Settings.GetLastDayOfWeek();
+			int day = (int)m_Timer.DayofWeektoInt();
+			std::string tempDateF;
+			std::string tempDateL;
+			m_csvName.append(" ");
 
-		//Add First Day
-		tempDateF = m_Timer.GetDateShiftX(first - day);
-		tempDateF.erase(tempDateF.find_last_of("-"));
-		tempDateF.replace(tempDateF.find("-"), 1, " ");
-		m_csvName.append(tempDateF);
+			//Add First Day
+			tempDateF = m_Timer.GetDateShiftX(first - day);
+			tempDateF.erase(tempDateF.find_last_of("-"));
+			tempDateF.replace(tempDateF.find("-"), 1, " ");
+			m_csvName.append(tempDateF);
 
-		//Add Last Day
-		tempDateL = m_Timer.GetDateShiftX(last - day);
-		tempDateL.erase(tempDateL.find_last_of("-"));
-		tempDateL.replace(tempDateL.find("-"), 1, " ");
-		if (tempDateF != tempDateL) {
-			m_csvName.append(" to ");
-			m_csvName.append(tempDateL);
+			//Add Last Day
+			tempDateL = m_Timer.GetDateShiftX(last - day);
+			tempDateL.erase(tempDateL.find_last_of("-"));
+			tempDateL.replace(tempDateL.find("-"), 1, " ");
+			if (tempDateF != tempDateL) {
+				m_csvName.append(" to ");
+				m_csvName.append(tempDateL);
+			}
+		}
+		else {
+			m_csvName.append(" ");
+			m_csvName.append(m_Timer.MonthFirstToLast());
 		}
 	}
 	m_csvName.append(m_csvFiletype);

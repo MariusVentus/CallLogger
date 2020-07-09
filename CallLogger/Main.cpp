@@ -148,7 +148,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			MessageBox(hwnd, "This was originally made in an hour while eating breakfast. \nOver time, it has ballooned into a project made over many hours, breakfasts, some lunches, a few dinners, and even squeezed into a few breaks.\n\nIt's far from perfect, but I am happy with the progress, and it's certainly helped me learn the Windows API.\nI hope it helps!\n\n-Marius Ventus", "About", MB_OK | MB_ICONINFORMATION);
 			break;
 		case ID_HELP:
-			MessageBox(hwnd, "There is no help, only Zuul. \nOr ping me on Teams. ;) \n\nOr the Readme on Github: https://github.com/MariusVentus/CallLogger/blob/master/README.md", "Halp", MB_OK | MB_ICONINFORMATION);
+			MessageBox(hwnd, "There is no help, only Zuul. \nOr ping me on Teams. \nOr the instructions in the root folder. \n\nOr the Readme on Github: https://github.com/MariusVentus/CallLogger/blob/master/README.md", "Halp", MB_OK | MB_ICONINFORMATION);
 			break;
 		case ID_UNDO:
 			g_Crafter.RemoveLastLine();

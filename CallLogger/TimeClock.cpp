@@ -230,6 +230,7 @@ void TimeClock::TestAll(void)
 	num = DaysinMonth(1, 2000);
 	num = DaysinMonth(1, 1900);
 	num = DaysinMonth(1, 2020);
+	str = MonthFirstToLast();
 
 }
 
@@ -310,6 +311,16 @@ std::string TimeClock::WeekDayShiftX(int x) const
 	else {
 		return "";
 	}
+}
+
+std::string TimeClock::MonthFirstToLast(void) const
+{
+	std::string output = GetMonth();
+	output.append(" 1 to ");
+	output.append(GetMonth());
+	output.append(" ");
+	output.append(std::to_string(DaysinMonth(MonthtoInt(), YeartoInt())));
+	return output;
 }
 
 unsigned TimeClock::DaytoInt(void) const

@@ -20,6 +20,7 @@ public:
 
 	unsigned DayofWeektoInt(void) const;
 	std::string WeekDayShiftX(int x) const;
+	std::string MonthFirstToLast(void) const;
 private:
 	std::string m_time;
 	unsigned DaysinMonth(unsigned month, unsigned year) const; //Months from 0!

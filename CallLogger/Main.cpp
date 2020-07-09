@@ -280,9 +280,14 @@ void OpenSettingsWindow(HWND hWnd) {
 
 	CreateWindowEx(NULL, "STATIC", "Weekly Auto-Splitting", WS_CHILD | WS_VISIBLE, 20, 10, 200, 25, hSetWindow, NULL, GetModuleHandle(NULL), NULL);
 	CreateWindowEx(NULL, "button", "Enabled", WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX, 20, 35, 80, 40, hSetWindow, (HMENU)10, NULL, NULL);
+	CreateWindowEx(NULL, "button", "Monthly Split", WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX, 120, 35, 120, 40, hSetWindow, (HMENU)11, NULL, NULL);
 
 	if (g_Settings.GetAutoSplit()) {
 		CheckDlgButton(hSetWindow, 10, BST_CHECKED);
+	}
+
+	if (g_Settings.GetMonthSplit()) {
+		CheckDlgButton(hSetWindow, 11, BST_CHECKED);
 	}
 
 	CreateWindowEx(NULL, "STATIC", "My Workdays", WS_CHILD | WS_VISIBLE, 20, 80, 200, 25, hSetWindow, NULL, GetModuleHandle(NULL), NULL);
@@ -327,6 +332,9 @@ LRESULT CALLBACK SetWinProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
 			break;
 		case 10:
 			g_Settings.SetAutoSplit(!g_Settings.GetAutoSplit()); 
+			break;
+		case 11:
+			g_Settings.SetMonthSplit(!g_Settings.GetMonthSplit());
 			break;
 		case 3:
 			g_Settings.SetWorkday(0, !g_Settings.GetWorkday(0)); //Sun

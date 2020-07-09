@@ -20,6 +20,10 @@ void SettingsHandler::ResetSettings(void)
 				std::getline(in, temp);
 				SetAutoSplit(StoB(temp));
 			}
+			else if (temp == "[MonthSplit Logs]") {
+				std::getline(in, temp);
+				SetMonthSplit(StoB(temp));
+			}
 			else if (temp == "[Workdays]") {
 				std::getline(in, temp);
 				char tc = temp.back();
@@ -54,6 +58,13 @@ void SettingsHandler::SaveSettingsToFile(void)
 	std::ofstream out(m_SettingsFile, std::ofstream::trunc);
 	out << "[AutoSplit Logs]\n";
 	if (m_AutoSplitLogs) {
+		out << "true\n";
+	}
+	else {
+		out << "false\n";
+	}
+	out << "[MonthSplit Logs]\n";
+	if (m_MonthSplitting) {
 		out << "true\n";
 	}
 	else {

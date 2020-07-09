@@ -1,4 +1,6 @@
 [AutoSplit Logs]
 true
+[MonthSplit Logs]
+false
 [Workdays]
 t,t,t,t,t,t,t,

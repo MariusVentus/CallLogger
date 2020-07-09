@@ -66,6 +66,12 @@
     <None Include="..\README.md">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="..\Call Logger Instructions.docx">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\Call Logger Instructions.pdf">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resource.rc">

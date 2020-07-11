@@ -23,4 +23,22 @@ private:
 	std::string ParseRawToCSV(std::string str);
 	std::string CraftFullCSVRow(std::string inSR, std::string inNotes);
 	std::string BuildHeader(void) const;
+
+	enum class CTypes {
+		Intro,
+		Triage,
+		Closure,
+		Misc
+	};
+	enum class CTemps {
+		Cool,
+		Warm,
+		Hot
+	};
+	enum class CConnect {
+		Answered,
+		NoAnswer,
+		NoAnswerNoVm,
+		NoAnswerVM
+	};
 };

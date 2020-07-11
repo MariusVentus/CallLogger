@@ -172,6 +172,10 @@ std::string StringParser::ParseRawToCSV(std::string str)
 			str[i] = str[i] + 32; //Make into White Space
 		}
 	}
+	//Remove Double whitespace
+	while (str.find("  ") != std::string::npos) {
+		str.erase(str.find("  "), 1);
+	}
 	//Add Trailiing Whitespace so AM/PM check and Time Check goes through full line
 	str.append(" ");
 
@@ -194,6 +198,62 @@ std::string StringParser::ParseRawToCSV(std::string str)
 			str.erase(str.find("pm"), 2);
 		}
 	}
+
+	//Start Optional Column Checks
+	//Call Type - Defaults to Misc
+	CTypes callType;
+	if (m_Settings.GetCType() || m_Settings.GetOutcomeType()) {
+		if (str.find("intro") != std::string::npos) {
+			callType = CTypes::Intro;
+		}
+		else if (str.find("triage") != std::string::npos) {
+			callType = CTypes::Triage;
+		}
+		else if (str.find("lower") != std::string::npos || str.find("close") != std::string::npos || str.find("closure") != std::string::npos) {
+			callType = CTypes::Closure;
+		}
+		else {
+			callType = CTypes::Misc;
+		}
+	}
+	//Connected - Assumes Answered
+	CConnect callConnected;
+	if (m_Settings.GetCConnect() || m_Settings.GetOutcomeConnect()) {
+		if (str.find("no answer") != std::string::npos || str.find("didn't answer") != std::string::npos
+			|| str.find("voicemail") != std::string::npos || str.find("left vm") != std::string::npos
+			|| str.find("no vm") != std::string::npos || str.find("vm full") != std::string::npos
+			|| str.find("failed") != std::string::npos)
+		{
+			if (str.find("no voicemail") != std::string::npos || str.find("no vm") != std::string::npos
+				|| str.find("voicemail full") != std::string::npos || str.find("vm full") != std::string::npos) {
+				callConnected = CConnect::NoAnswerNoVm;
+			}
+			else if (str.find("voicemail") != std::string::npos || str.find(" vm") != std::string::npos || str.find(",vm") != std::string::npos) {
+				callConnected = CConnect::NoAnswerVM;
+			}
+			else {
+				callConnected = CConnect::NoAnswer;
+			}
+		}
+		else {
+			callConnected = CConnect::Answered;
+		}
+	}
+	//Temp - Defaults cool
+	CTemps callTemp;
+	if (m_Settings.GetCTemp() || m_Settings.GetOutcomeTemp()) {
+		if (str.find(" hot ") != std::string::npos || str.find(":hot") != std::string::npos 
+			|| str.find(" hot,") != std::string::npos || str.find(",hot") != std::string::npos) {
+			callTemp = CTemps::Hot;
+		}
+		else if (str.find(" warm") != std::string::npos || str.find(":warm") != std::string::npos || str.find(",warm") != std::string::npos) {
+			callTemp = CTemps::Warm;
+		}
+		else {
+			callTemp = CTemps::Cool;
+		}
+	}
+	//Ending Optional Column Checks
 
 	//All non-numbers (besides : ) turn to Whitespace
 	for (unsigned i = 0; i < str.size(); i++) {
@@ -274,58 +334,190 @@ std::string StringParser::ParseRawToCSV(std::string str)
 	token.clear();
 
 	//---------------Phone Number---------------
-	//Country Code check
-	unsigned countryCodeNum = 0;
-	if (str.find(" ") <= 3) {
-		countryCodeNum = str.find(" ");
-	}
-	//Remove Whitespace until sufficient numbers for Phone Number found, and fill token if found
-	while (str.find(" ") != std::string::npos) {
-		if (str.find(" ") > 9) {
-			token = str;
-			token.erase(token.find(" "), token.size());
-			if (token.size() > 15) {
-				token.erase(15, token.size());
+	if (!m_Settings.GetPN()) {
+		//Country Code check
+		unsigned countryCodeNum = 0;
+		if (str.find(" ") <= 3) {
+			countryCodeNum = str.find(" ");
+		}
+		//Remove Whitespace until sufficient numbers for Phone Number found, and fill token if found
+		while (str.find(" ") != std::string::npos) {
+			if (str.find(" ") > 9) {
+				token = str;
+				token.erase(token.find(" "), token.size());
+				if (token.size() > 15) {
+					token.erase(15, token.size());
+				}
+				break;
 			}
+			else {
+				str.erase(str.find(" "), 1);
+			}
+		}
+		//if Token still empty, just put whatever numbers found in it
+		if (token.empty()) {
+			token = str;
+		}
+		//Formatting
+		if (token.size() != 0 && countryCodeNum != token.size()) //Eval left to right, so fail on condition 1 (==0) shouldn't cause issue with condition 2. 
+		{
+			if (token.size() - countryCodeNum < 5) {
+				countryCodeNum = 0;
+			}
+			//Dash 1
+			if (token.size() - countryCodeNum > 4) {
+				token.insert(token.size() - 4, "-");
+			}
+			//Dash 2
+			if ((token.size() - countryCodeNum) > 8) {
+				token.insert(token.size() - 8, "-");
+			}
+			//Country Code Space
+			if (countryCodeNum != 0) {
+				token.insert(countryCodeNum, " ");
+			}
+			if (countryCodeNum == 3 && token.size() == 12) {
+				token.replace(3, 1, "-");
+			}
+
+			//PLUS for International calling
+			if (token.find(" ") != std::string::npos || token.size() > 12) {
+				token.insert(0, "+");
+			}
+		}
+		token.insert(0, "'");
+		output.append(token);
+	}
+
+	//Add Optional Columns
+	//Type
+	if (m_Settings.GetCType()) {
+		output.append(",");
+		switch (callType)
+		{
+		case StringParser::CTypes::Intro:
+			output.append("Intro");
+			break;
+		case StringParser::CTypes::Triage:
+			output.append("Triage");
+			break;
+		case StringParser::CTypes::Closure:
+			output.append("Closure");
+			break;
+		case StringParser::CTypes::Misc:
+			output.append("Misc.");
+			break;
+		default:
+			output.append("Unknown");
 			break;
 		}
-		else {
-			str.erase(str.find(" "), 1);
+	}
+	//Connected
+	if (m_Settings.GetCConnect()) {
+		output.append(",");
+		switch (callConnected)
+		{
+		case StringParser::CConnect::Answered:
+			output.append("Answered");
+			break;
+		case StringParser::CConnect::NoAnswer:
+			output.append("No Answer");
+			break;
+		case StringParser::CConnect::NoAnswerNoVm:
+			output.append("No Answer-No VM");
+			break;
+		case StringParser::CConnect::NoAnswerVM:
+			output.append("No Answer-VM");
+			break;
+		default:
+			output.append("Unknown");
+			break;
 		}
 	}
-	//if Token still empty, just put whatever numbers found in it
-	if (token.empty()) {
-		token = str;
+	//Temp
+	if (m_Settings.GetCTemp()) {
+		output.append(",");
+		switch (callTemp)
+		{
+		case StringParser::CTemps::Cool:
+			output.append("Cool");
+			break;
+		case StringParser::CTemps::Warm:
+			output.append("Warm");
+			break;
+		case StringParser::CTemps::Hot:
+			output.append("Hot");
+			break;
+		default:
+			output.append("Unknown");
+			break;
+		}
 	}
-	//Formatting
-	if (token.size() != 0 && countryCodeNum != token.size()) //Eval left to right, so fail on condition 1 (==0) shouldn't cause issue with condition 2. 
-	{	
-		if (token.size() - countryCodeNum < 5) {
-			countryCodeNum = 0;
+	//Outcome
+	if (m_Settings.GetOutcomeType() || m_Settings.GetOutcomeConnect() || m_Settings.GetOutcomeTemp()) {
+		output.append(",");
+		//Type
+		if (m_Settings.GetOutcomeType()) {
+			switch (callType)
+			{
+			case StringParser::CTypes::Intro:
+				output.append(" Intro ");
+				break;
+			case StringParser::CTypes::Triage:
+				output.append(" Triage ");
+				break;
+			case StringParser::CTypes::Closure:
+				output.append(" Closure ");
+				break;
+			case StringParser::CTypes::Misc:
+				output.append(" Misc. ");
+				break;
+			default:
+				output.append(" Unknown Type ");
+				break;
+			}
 		}
-		//Dash 1
-		if (token.size() - countryCodeNum > 4) {
-			token.insert(token.size() - 4, "-");
+		//Connect
+		if (m_Settings.GetOutcomeConnect()) {
+			switch (callConnected)
+			{
+			case StringParser::CConnect::Answered:
+				output.append(" Answered ");
+				break;
+			case StringParser::CConnect::NoAnswer:
+				output.append(" No Answer ");
+				break;
+			case StringParser::CConnect::NoAnswerNoVm:
+				output.append(" No Answer-No VM ");
+				break;
+			case StringParser::CConnect::NoAnswerVM:
+				output.append(" No Answer-VM ");
+				break;
+			default:
+				output.append(" Success Unknown ");
+				break;
+			}
 		}
-		//Dash 2
-		if ((token.size() - countryCodeNum) > 8) {
-			token.insert(token.size() - 8, "-");
+		//Temp
+		if (m_Settings.GetOutcomeTemp()) {
+			switch (callTemp)
+			{
+			case StringParser::CTemps::Cool:
+				output.append(" Temp:Cool ");
+				break;
+			case StringParser::CTemps::Warm:
+				output.append(" Temp:Warm ");
+				break;
+			case StringParser::CTemps::Hot:
+				output.append(" Temp:Hot ");
+				break;
+			default:
+				output.append(" Temp:Unknown ");
+				break;
+			}
 		}
-		//Country Code Space
-		if (countryCodeNum != 0) {
-			token.insert(countryCodeNum, " ");
-		}
-		if (countryCodeNum == 3 && token.size() == 12) {
-			token.replace(3, 1, "-");
-		}
+	}
 
-		//PLUS for International calling
-		if (token.find(" ") != std::string::npos || token.size() > 12) {
-			token.insert(0, "+");
-		}
-	}
-	token.insert(0, "'");
-	output.append(token);
 	return output;
 }
 

@@ -32,15 +32,15 @@ std::string StringParser::GetCSVNameNoPath(void) const
 void StringParser::ClearCurrentLog(void)
 {
 	std::ofstream out(m_csvName, std::ofstream::trunc);
-	out << "  Date  ,  SR#  ,  Time  ,  Phone#  \n";
+	out << BuildHeader();
 }
 
 void StringParser::CheckCSV(void) const
 {
 	std::ifstream in(m_csvName);
 	if (!in) {
-		std::ofstream tempOut(m_csvName, std::ofstream::app);
-		tempOut << "  Date  ,  SR#  ,  Time  ,  Phone#  \n";
+		std::ofstream out(m_csvName, std::ofstream::app);
+		out << BuildHeader();
 	}
 }
 
@@ -354,4 +354,26 @@ std::string StringParser::CraftFullCSVRow(std::string inSR, std::string inNotes)
 
 	return row;
 
+}
+
+std::string StringParser::BuildHeader(void) const
+{
+	std::string output = "  Date  ,  SR#  ,  Time  ";
+	if (!m_Settings.GetPN()) {
+		output.append(",  Phone#  ");
+	}
+	if (m_Settings.GetCType()) {
+		output.append(",  Type  ");
+	}
+	if (m_Settings.GetCConnect()) {
+		output.append(",  Connected(Y//N)  ");
+	}
+	if (m_Settings.GetCTemp()) {
+		output.append(",  Temp  ");
+	}
+	if (m_Settings.GetOutcomeType() || m_Settings.GetOutcomeConnect() || m_Settings.GetOutcomeTemp()) {
+		output.append(",  Outcome  ");
+	}
+	output.append("\n");
+	return output;
 }

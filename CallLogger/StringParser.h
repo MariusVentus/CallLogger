@@ -22,4 +22,5 @@ private:
 	std::string m_csvName = "";
 	std::string ParseRawToCSV(std::string str);
 	std::string CraftFullCSVRow(std::string inSR, std::string inNotes);
+	std::string BuildHeader(void) const;
 };

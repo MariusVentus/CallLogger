@@ -1,5 +1,5 @@
 # CallLogger
-***V0.1.0***
+***V0.1.3***
 Super quick and super ugly call logger to make work slightly easier.
 
 Just copy call notes in, and build a call log fast! 
@@ -30,6 +30,10 @@ V0.0.9 > Date box shos current date, with Shift/Reset buttons to alter adding da
 V0.1.0 > Alpha! Logo added, slight tweak to the layout and visuals. Ready for use!
 
 V0.1.1 > Update: Made the note parser more robust so it could handle edge cases involving 1-2 digit times with no phone number, or small phone numbers. Improved phone number formatting. AM/PM check far more strict to prevent false positives. Efficiency and Polish updates.
+
+V0.1.2 > Added a Monthly-Split option which lets Call Logs split on a monthly basis.
+
+V0.1.3 > Option to disable Phone Number column, enable Call Type, Call Connected, and Call Temp columns, or enable an Outcome column able to display all three. 
 
 ***Planned Features (Warning: Doing this for fun in my free time. Updates will be slow, if at all)***
 

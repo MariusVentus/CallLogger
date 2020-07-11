@@ -24,6 +24,36 @@ void SettingsHandler::ResetSettings(void)
 				std::getline(in, temp);
 				SetMonthSplit(StoB(temp));
 			}
+			//Added Options Start
+			else if (temp == "[Disable PhoneNumbers]") {
+				std::getline(in, temp);
+				SetPN(StoB(temp));
+			}
+			else if (temp == "[Enable CallType]") {
+				std::getline(in, temp);
+				SetCType(StoB(temp));
+			}
+			else if (temp == "[Enable CallConnected]") {
+				std::getline(in, temp);
+				SetCConnect(StoB(temp));
+			}
+			else if (temp == "[Enable CallTemp]") {
+				std::getline(in, temp);
+				SetCTemp(StoB(temp));
+			}
+			else if (temp == "[Enable OutcomeType]") {
+				std::getline(in, temp);
+				SetOutcomeType(StoB(temp));
+			}
+			else if (temp == "[Enable OutcomeConnected]") {
+				std::getline(in, temp);
+				SetOutcomeConnect(StoB(temp));
+			}
+			else if (temp == "[Enable OutcomeTemp]") {
+				std::getline(in, temp);
+				SetOutcomeTemp(StoB(temp));
+			}
+			//Added Options End
 			else if (temp == "[Workdays]") {
 				std::getline(in, temp);
 				char tc = temp.back();
@@ -48,8 +78,7 @@ void SettingsHandler::ResetSettings(void)
 		} while (!in.eof() && !temp.empty());
 	}
 	else {
-		std::ofstream out(m_SettingsFile, std::ofstream::trunc);
-		out << "[AutoSplit Logs]\ntrue\n[Workdays]\nt,t,t,t,t,t,t";
+		SaveSettingsToFile();
 	}
 }
 
@@ -70,6 +99,65 @@ void SettingsHandler::SaveSettingsToFile(void)
 	else {
 		out << "false\n";
 	}
+
+	//Added Options Start - Adding settings can be easier. No reason to keep this.
+	out << "[Disable PhoneNumbers]\n";
+	if (m_DisablePhoneNumbers) {
+		out << "true\n";
+	}
+	else {
+		out << "false\n";
+	}
+	//
+	out << "[Enable CallType]\n";
+	if (m_EnableCallType) {
+		out << "true\n";
+	}
+	else {
+		out << "false\n";
+	}
+	//
+	out << "[Enable CallConnected]\n";
+	if (m_EnableCallConnected) {
+		out << "true\n";
+	}
+	else {
+		out << "false\n";
+	}
+	//
+	out << "[Enable CallTemp]\n";
+	if (m_EnableCallTemp) {
+		out << "true\n";
+	}
+	else {
+		out << "false\n";
+	}
+	//
+	out << "[Enable OutcomeType]\n";
+	if (m_EnableOutcomeType) {
+		out << "true\n";
+	}
+	else {
+		out << "false\n";
+	}
+	//
+	out << "[Enable OutcomeConnected]\n";
+	if (m_EnableOutcomeConnected) {
+		out << "true\n";
+	}
+	else {
+		out << "false\n";
+	}
+	//
+	out << "[Enable OutcomeTemp]\n";
+	if (m_EnableOutcomeTemp) {
+		out << "true\n";
+	}
+	else {
+		out << "false\n";
+	}
+	//Added Options End
+
 	out << "[Workdays]\n";
 	for (unsigned i = 0; i < 7;i++) {
 		if (m_WorkDays[i]) {

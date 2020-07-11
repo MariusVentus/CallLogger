@@ -7,7 +7,7 @@
 
 
 const char g_szClassName[] = "CallLoggerMainWindow";
-const char g_MainWindowTitle[] = "Call Logger v0.1.2";
+const char g_MainWindowTitle[] = "Call Logger v0.1.3";
 SettingsHandler g_Settings;
 TimeClock g_Timeclock;
 StringParser g_Crafter(g_Settings, g_Timeclock);
@@ -270,7 +270,7 @@ void OpenSettingsWindow(HWND hWnd) {
 
 	GetWindowRect(hMainWindow, &g_MainWin);
 
-	HWND hSetWindow = CreateWindowEx(WS_EX_CLIENTEDGE, "mySettingsWindow", "Settings", WS_VISIBLE | WS_OVERLAPPEDWINDOW, g_MainWin.left, g_MainWin.top, 300, 400, hWnd, NULL, NULL, NULL);
+	HWND hSetWindow = CreateWindowEx(WS_EX_CLIENTEDGE, "mySettingsWindow", "Settings", WS_VISIBLE | WS_OVERLAPPEDWINDOW, g_MainWin.left, g_MainWin.top, 300, 600, hWnd, NULL, NULL, NULL);
 	
 	if (hSetWindow == NULL)
 	{
@@ -305,8 +305,43 @@ void OpenSettingsWindow(HWND hWnd) {
 		}
 	}
 
-	CreateWindowEx(WS_EX_CLIENTEDGE, "button", "Ok", WS_VISIBLE | WS_CHILD, 25, 300, 100, 40, hSetWindow, (HMENU)IDOK, NULL, NULL);
-	CreateWindowEx(WS_EX_CLIENTEDGE, "button", "Cancel", WS_VISIBLE | WS_CHILD, 150, 300, 100, 40, hSetWindow, (HMENU)IDCANCEL, NULL, NULL);
+
+	CreateWindowEx(NULL, "STATIC", "Advanced: Column Options", WS_CHILD | WS_VISIBLE, 20, 300, 200, 25, hSetWindow, NULL, GetModuleHandle(NULL), NULL);
+	CreateWindowEx(NULL, "button", "Disable Phone Numbers", WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX, 30, 315, 200, 40, hSetWindow, (HMENU)12, NULL, NULL);
+	CreateWindowEx(NULL, "button", "Call Type", WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX, 30, 345, 80, 40, hSetWindow, (HMENU)13, NULL, NULL);
+	CreateWindowEx(NULL, "button", "Connected", WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX, 120, 345, 90, 40, hSetWindow, (HMENU)14, NULL, NULL);
+	CreateWindowEx(NULL, "button", "Temp", WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX, 30, 375, 80, 40, hSetWindow, (HMENU)15, NULL, NULL);
+
+	CreateWindowEx(NULL, "STATIC", "Advanced: Outcome Column", WS_CHILD | WS_VISIBLE, 20, 410, 200, 25, hSetWindow, NULL, GetModuleHandle(NULL), NULL);
+
+	CreateWindowEx(NULL, "button", "Call Type", WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX, 30, 425, 80, 40, hSetWindow, (HMENU)16, NULL, NULL);
+	CreateWindowEx(NULL, "button", "Connected", WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX, 120, 425, 90, 40, hSetWindow, (HMENU)17, NULL, NULL);
+	CreateWindowEx(NULL, "button", "Temp", WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX, 30, 455, 80, 40, hSetWindow, (HMENU)18, NULL, NULL);
+
+	if (g_Settings.GetPN()) {
+		CheckDlgButton(hSetWindow, 12, BST_CHECKED);
+	}
+	if (g_Settings.GetCType()) {
+		CheckDlgButton(hSetWindow, 13, BST_CHECKED);
+	}
+	if (g_Settings.GetCConnect()) {
+		CheckDlgButton(hSetWindow, 14, BST_CHECKED);
+	}
+	if (g_Settings.GetCTemp()) {
+		CheckDlgButton(hSetWindow, 15, BST_CHECKED);
+	}
+	if (g_Settings.GetOutcomeType()) {
+		CheckDlgButton(hSetWindow, 16, BST_CHECKED);
+	}
+	if (g_Settings.GetOutcomeConnect()) {
+		CheckDlgButton(hSetWindow, 17, BST_CHECKED);
+	}
+	if (g_Settings.GetOutcomeTemp()) {
+		CheckDlgButton(hSetWindow, 18, BST_CHECKED);
+	}
+
+	CreateWindowEx(WS_EX_CLIENTEDGE, "button", "Ok", WS_VISIBLE | WS_CHILD, 25, 500, 100, 40, hSetWindow, (HMENU)IDOK, NULL, NULL);
+	CreateWindowEx(WS_EX_CLIENTEDGE, "button", "Cancel", WS_VISIBLE | WS_CHILD, 150, 500, 100, 40, hSetWindow, (HMENU)IDCANCEL, NULL, NULL);
 
 	//Disable the main window, turning a Modless dialogue box into a modal dialogue
 	EnableWindow(hWnd, false);
@@ -336,6 +371,7 @@ LRESULT CALLBACK SetWinProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
 		case 11:
 			g_Settings.SetMonthSplit(!g_Settings.GetMonthSplit());
 			break;
+		//Weekdays
 		case 3:
 			g_Settings.SetWorkday(0, !g_Settings.GetWorkday(0)); //Sun
 			break;
@@ -356,6 +392,28 @@ LRESULT CALLBACK SetWinProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
 			break;
 		case 9:
 			g_Settings.SetWorkday(6, !g_Settings.GetWorkday(6)); //Sat
+			break;
+		//Added Column Options
+		case 12:
+			g_Settings.SetPN(!g_Settings.GetPN());
+			break;
+		case 13:
+			g_Settings.SetCType(!g_Settings.GetCType());
+			break;
+		case 14:
+			g_Settings.SetCConnect(!g_Settings.GetCConnect());
+			break;
+		case 15:
+			g_Settings.SetCTemp(!g_Settings.GetCTemp());
+			break;
+		case 16:
+			g_Settings.SetOutcomeType(!g_Settings.GetOutcomeType());
+			break;
+		case 17:
+			g_Settings.SetOutcomeConnect(!g_Settings.GetOutcomeConnect());
+			break;
+		case 18:
+			g_Settings.SetOutcomeTemp(!g_Settings.GetOutcomeTemp());
 			break;
 		default:
 			break;

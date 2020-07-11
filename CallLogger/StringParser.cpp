@@ -78,7 +78,7 @@ void StringParser::RemoveLastLine(void)
 void StringParser::SetCSVfromDate(void)
 {
 	m_csvName = m_csvRoot;
-	if (m_Settings.GetAutoSplit()) {
+	if (m_Settings.GetAutoSplit() || m_Settings.GetMonthSplit()) {
 		if (!m_Settings.GetMonthSplit()) {
 			int first = (int)m_Settings.GetFirstDayOfWeek();
 			int last = (int)m_Settings.GetLastDayOfWeek();

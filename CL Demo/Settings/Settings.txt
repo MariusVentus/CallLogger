@@ -2,5 +2,19 @@
 true
 [MonthSplit Logs]
 false
+[Disable PhoneNumbers]
+false
+[Enable CallType]
+false
+[Enable CallConnected]
+false
+[Enable CallTemp]
+false
+[Enable OutcomeType]
+false
+[Enable OutcomeConnected]
+false
+[Enable OutcomeTemp]
+false
 [Workdays]
 t,t,t,t,t,t,t,

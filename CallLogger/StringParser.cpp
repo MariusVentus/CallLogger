@@ -328,13 +328,12 @@ std::string StringParser::ParseRawToCSV(std::string str)
 			}
 		}
 	}
-	token.push_back(',');
-
 	output = token;
 	token.clear();
 
 	//---------------Phone Number---------------
 	if (!m_Settings.GetPN()) {
+		output.push_back(',');
 		//Country Code check
 		unsigned countryCodeNum = 0;
 		if (str.find(" ") <= 3) {

@@ -261,6 +261,11 @@ std::string StringParser::ParseRawToCSV(std::string str)
 			str[i] = 32;
 		}
 	}
+	//Remove : Directly
+	while (str.find(":") != std::string::npos) {
+		str.erase(str.find(":"), 1);
+	}
+
 	//Remove Double whitespace
 	while (str.find("  ") != std::string::npos) {
 		str.erase(str.find("  "), 1);
@@ -268,11 +273,6 @@ std::string StringParser::ParseRawToCSV(std::string str)
 	//Remove Leading Whitespace
 	while (str.find(" ") == 0) {
 		str.erase(str.find(" "), 1);
-	}
-
-	//Remove : Directly
-	while (str.find(":") != std::string::npos) {
-		str.erase(str.find(":"), 1);
 	}
 
 	//Fill Token with Time

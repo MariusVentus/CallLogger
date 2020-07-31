@@ -7,7 +7,7 @@
 
 
 const char g_szClassName[] = "CallLoggerMainWindow";
-const char g_MainWindowTitle[] = "Call Logger v0.1.3";
+const char g_MainWindowTitle[] = "Call Logger v0.1.31";
 SettingsHandler g_Settings;
 TimeClock g_Timeclock;
 StringParser g_Crafter(g_Settings, g_Timeclock);

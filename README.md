@@ -35,6 +35,10 @@ V0.1.2 > Added a Monthly-Split option which lets Call Logs split on a monthly ba
 
 V0.1.3 > Option to disable Phone Number column, enable Call Type, Call Connected, and Call Temp columns, or enable an Outcome column able to display all three. 
 
+V0.1.31 > Quick fix, moving the ":" removal before the removal of double whitespace. Country Code now maintains better.
+
+V0.1.4 > Revamped keyword searching for the optional checks, added more keywords.
+
 ***Planned Features (Warning: Doing this for fun in my free time. Updates will be slow, if at all)***
 
 1.) Improved code (right now it is spaghetti all shoved in main.cpp)

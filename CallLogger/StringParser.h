@@ -1,6 +1,8 @@
 #pragma once
 #include "TimeClock.h"
 #include "SettingsHandler.h"
+#include <vector>
+
 
 class StringParser {
 public:
@@ -10,6 +12,7 @@ public:
 	std::string GetCSVNameNoPath(void) const;
 	void ClearCurrentLog(void);
 	void CheckCSV(void) const;
+	bool KeywordCheck(const std::vector<std::string>& keywords, const std::string& str);
 	void RemoveLastLine(void);
 	void SetCSVfromDate(void);
 	void StampCurrentLog(void);

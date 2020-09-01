@@ -1,6 +1,5 @@
 #include "StringParser.h"
 #include <fstream>
-#include <vector>
 
 StringParser::StringParser(const SettingsHandler& inSet, const TimeClock& inTime)
 	:
@@ -42,6 +41,16 @@ void StringParser::CheckCSV(void) const
 		std::ofstream out(m_csvName, std::ofstream::app);
 		out << BuildHeader();
 	}
+}
+
+bool StringParser::KeywordCheck(const std::vector<std::string>& keywords, const std::string& str)
+{
+	for (unsigned i = 0; i < keywords.size(); i++) {
+		if (str.find(keywords[i]) != std::string::npos) {
+			return true;
+		}
+	}
+	return false;
 }
 
 void StringParser::RemoveLastLine(void)
@@ -209,7 +218,7 @@ std::string StringParser::ParseRawToCSV(std::string str)
 		else if (str.find("triage") != std::string::npos) {
 			callType = CTypes::Triage;
 		}
-		else if (str.find("lower") != std::string::npos || str.find("close") != std::string::npos || str.find("closure") != std::string::npos) {
+		else if (KeywordCheck({ "lower","close","closure" }, str)) {
 			callType = CTypes::Closure;
 		}
 		else {
@@ -219,16 +228,12 @@ std::string StringParser::ParseRawToCSV(std::string str)
 	//Connected - Assumes Answered
 	CConnect callConnected;
 	if (m_Settings.GetCConnect() || m_Settings.GetOutcomeConnect()) {
-		if (str.find("no answer") != std::string::npos || str.find("didn't answer") != std::string::npos
-			|| str.find("voicemail") != std::string::npos || str.find("left vm") != std::string::npos
-			|| str.find("no vm") != std::string::npos || str.find("vm full") != std::string::npos
-			|| str.find("failed") != std::string::npos)
+		if (KeywordCheck({ "no answer", "didn't answer", "voicemail", "left vm", "no vm", "vm full", "failed", "disconnect", "box full" }, str))
 		{
-			if (str.find("no voicemail") != std::string::npos || str.find("no vm") != std::string::npos
-				|| str.find("voicemail full") != std::string::npos || str.find("vm full") != std::string::npos) {
+			if (KeywordCheck({ "no voicemail", "no vm", "voicemail full", "vm full","box full" }, str)) {
 				callConnected = CConnect::NoAnswerNoVm;
 			}
-			else if (str.find("voicemail") != std::string::npos || str.find(" vm") != std::string::npos || str.find(",vm") != std::string::npos) {
+			else if (KeywordCheck({ "voicemail"," vm",",vm","left message","left a message" }, str)) {
 				callConnected = CConnect::NoAnswerVM;
 			}
 			else {
@@ -242,11 +247,10 @@ std::string StringParser::ParseRawToCSV(std::string str)
 	//Temp - Defaults cool
 	CTemps callTemp;
 	if (m_Settings.GetCTemp() || m_Settings.GetOutcomeTemp()) {
-		if (str.find(" hot ") != std::string::npos || str.find(":hot") != std::string::npos 
-			|| str.find(" hot,") != std::string::npos || str.find(",hot") != std::string::npos) {
+		if (KeywordCheck({ " hot ",":hot"," hot,",",hot","|hot",";hot","boiling" }, str)) {
 			callTemp = CTemps::Hot;
 		}
-		else if (str.find(" warm") != std::string::npos || str.find(":warm") != std::string::npos || str.find(",warm") != std::string::npos) {
+		else if (KeywordCheck({ " warm",":warm",",warm","|warm",";warm" }, str)) {
 			callTemp = CTemps::Warm;
 		}
 		else {
